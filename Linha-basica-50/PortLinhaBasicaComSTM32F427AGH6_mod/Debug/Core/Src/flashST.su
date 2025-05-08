@@ -1,0 +1,13 @@
+../Core/Src/flashST.c:34:17:GetSector	24	static
+../Core/Src/flashST.c:101:6:FLASH_apaga	16	static
+../Core/Src/flashST.c:164:6:FLASH_escreve_16bits	24	static
+../Core/Src/flashST.c:178:6:FLASH_escreve_8bits	24	static
+../Core/Src/flashST.c:208:14:FLASH_escreve_32bits	32	static
+../Core/Src/flashST.c:244:6:FLASH_escreve_string	56	dynamic
+../Core/Src/flashST.c:280:6:FLASH_le_16bits	16	static
+../Core/Src/flashST.c:298:6:FLASH_le_32bits	16	static
+../Core/Src/flashST.c:314:6:FLASH_le_string_0xFF	24	static
+../Core/Src/flashST.c:337:6:erase1	16	static
+../Core/Src/flashST.c:386:6:get_calib_addr	24	static
+../Core/Src/flashST.c:412:6:erase	24	static
+../Core/Src/flashST.c:491:15:program	48	static

@@ -1,0 +1,11 @@
+display.c:119:6:DisplayInit	8	static
+display.c:146:6:WriteChar	12	static
+display.c:278:6:WriteString	16	static
+display.c:227:6:WriteBanner	16	static
+display.c:246:6:SkewBanner	24	static
+display.c:317:6:FloatToStrForEnergy	48	static
+display.c:526:6:FloatToStrForPulso	48	static
+display.c:739:6:IntToStr	12	static
+display.c:753:6:IntToStr1	20	static
+display.c:775:6:FloatToStr	32	static
+display.c:903:6:setDpyPiscante	0	static

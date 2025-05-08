@@ -1,0 +1,8 @@
+../Core/Port/timer.c:36:6:enable_timer	1
+../Core/Port/timer.c:64:6:disable_timer	1
+../Core/Port/timer.c:88:6:reset_timer	1
+../Core/Port/timer.c:109:6:disable_interrupt_timer1	1
+../Core/Port/timer.c:116:6:enable_interrupt_timer1	1
+../Core/Port/timer.c:134:7:init_timer	1
+../Core/Port/timer.c:610:6:T0isr	1
+../Core/Port/timer.c:812:6:timer_admite_nested_interrupt_srv	17

@@ -1,0 +1,566 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+
+
+
+
+
+unsigned int T0CCR;
+
+
+//#define EXT extern
+
+//#include "linhabasica_port.h"
+
+void TargetInit(){};
+void GPIOResetInit(){};
+void ConfigurePLL_72Mhz(){};
+void ConfigurePLL_18Mhz(){};
+void ConfigurePLL_48Mhz(){};
+void main_TcpNet(){};
+
+
+
+
+#define MD4060_EQUIP 0
+#define TR_EQUIP 1
+#define CM_EQUIP 2
+#define CA_EQUIP 3
+#define CP_EQUIP 4
+#define CT_EQUIP 5
+
+#define EQUIP_COM_ST  MD4060_EQUIP
+
+/*/////////////////////////////////////////////////////
+//					PORTA P0
+/////////////////////////////////////////////////////
+#define	TXD0_PIN  		0x00000001 	//P0.0
+#define	RXD0_PIN  		0x00000002 	//P0.1
+#define	MED_FREQ_PIN 	0x00000004	//P0.2
+#if EQUIP!=CM_EQUIP
+#define	DPY_RST_PIN 	0x00010000	//P0.16
+#endif
+//#define	E2P_CLK_PIN 	0x00000010	//P0.4
+#define	E2P_DO_PIN 		0x00000020	//P0.5
+#define	E2P_DI_PIN 		0x00000040	//P0.6
+#define	E2P_CS_PIN 		0x00000080	//P0.7
+
+#ifdef MD4040
+#define	DPY_CLK_PIN     0x00080000	//P0.19
+#define	DPY_ENA_PIN 	0x00100000	//P0.20
+#endif
+#ifdef MD4000
+#define	DPY_CLK_PIN     0x00001000	//P0.12
+#define	DPY_ENA_PIN 	0x00002000	//P0.13
+#endif
+
+#define	REL1_CS	 		0x00040000	//P0.18
+#define	REL2_CS	 		0x00010000	//P0.16
+#define	REL_OE	 		0x00020000 	//P0.17
+#define	CS	 			0x00080000 	//P0.19
+#define	RS	 			0x00100000 	//P0.20
+#define BARRAMENTO    		0x000000FF 	//Localizacao do barramento de dados, da porta 16 ateh a 23
+
+
+
+
+
+
+#define	BUZZER_PIN 		0x00000200 	//P0.9
+#if EQUIP!=CM_EQUIP
+#define	WR7SEG_PIN	 	0x00040000	//P0.18
+#endif
+
+#define	HABSER_PIN	 	0x00000010	//P0.4
+#define	ISP_PIN		 	0x00004000	//P0.14
+#if MD4060 == 1
+	#define	WDI_PIN	 		0x00000800	//P2.11
+#else
+	#define	WDI_PIN	 		0x00008000	//P0.15
+#endif
+#define	TCL1_PIN	 	0x00020000	//P0.17
+#define	AD_TCB_PIN	 	0x00200000	//P0.21
+#define	AD_TCC_PIN		0x00400000  //P0.22
+#define	VAGO1_PIN	 	0x00800000	//P0.23
+#define	ETH_AEN_PIN	 	0x02000000	//P0.25
+#define	AD_TPA_PIN		0x10000000	//P0.28
+#define	AD_TPB_PIN 		0x20000000	//P0.29
+#define	AD_TPC_PIN		0x40000000	//P0.30
+#define	VAGO2_PIN	 	0x80000000	//0.31
+#if EQUIP!=CM_EQUIP
+#ifndef PROTOTIPO_TR
+#define	TECLA_RESET_IP	0x00000020 	//P0.5
+#else
+#define	TECLA_RESET_IP	0x00040000 	//P0.18
+#endif
+#define	LED_ONOFF_PIN	0x00000040 	//P0.6
+#define	LED_TX	0x00000080 	//P0.7
+#define	LED_RX	0x00000100 	//P0.8
+#endif
+
+
+
+
+#define DPY_WR_Pin GPIO_PIN_5
+#define DPY_WR_GPIO_Port GPIOI
+#define MED_FREQ_Pin GPIO_PIN_1
+#define MED_FREQ_GPIO_Port GPIOE
+#define DPY_RST_Pin GPIO_PIN_12
+#define DPY_RST_GPIO_Port GPIOG
+#define TL6_Pin GPIO_PIN_2
+#define TL6_GPIO_Port GPIOE
+#define PWD_Pin GPIO_PIN_4
+#define PWD_GPIO_Port GPIOI
+#define DPY_CLK_Pin GPIO_PIN_0
+#define DPY_CLK_GPIO_Port GPIOE
+#define DPY_ENA_Pin GPIO_PIN_7
+#define DPY_ENA_GPIO_Port GPIOB
+#define LED_RX__REL1_CS_Pin GPIO_PIN_6
+#define LED_RX__REL1_CS_GPIO_Port GPIOD
+#define TL1_Pin GPIO_PIN_3
+#define TL1_GPIO_Port GPIOE
+#define TL2_Pin GPIO_PIN_4
+#define TL2_GPIO_Port GPIOE
+#define AUX1_Pin GPIO_PIN_9
+#define AUX1_GPIO_Port GPIOB
+#define REL_OE_Pin GPIO_PIN_6
+#define REL_OE_GPIO_Port GPIOB
+#define LED_TX__REL2_CS_Pin GPIO_PIN_10
+#define LED_TX__REL2_CS_GPIO_Port GPIOG
+#define TL3_Pin GPIO_PIN_5
+#define TL3_GPIO_Port GPIOE
+#define TL4_Pin GPIO_PIN_6
+#define TL4_GPIO_Port GPIOE
+#define HAB_SER_RS485_Pin GPIO_PIN_8
+#define HAB_SER_RS485_GPIO_Port GPIOB
+#define AUX2_Pin GPIO_PIN_14
+#define AUX2_GPIO_Port GPIOC
+#define VBUS_Pin GPIO_PIN_13
+#define VBUS_GPIO_Port GPIOC
+#define DPY0_Pin GPIO_PIN_9
+#define DPY0_GPIO_Port GPIOA
+#define DPY1_Pin GPIO_PIN_10
+#define DPY1_GPIO_Port GPIOA
+#define DPY2_Pin GPIO_PIN_11
+#define DPY2_GPIO_Port GPIOA
+#define DPY3_Pin GPIO_PIN_12
+#define DPY3_GPIO_Port GPIOA
+#define BACKLIGHT_Pin GPIO_PIN_8
+#define BACKLIGHT_GPIO_Port GPIOA
+#define TL5_Pin GPIO_PIN_15
+#define TL5_GPIO_Port GPIOC
+#define TXD_RS485_Pin GPIO_PIN_6
+#define TXD_RS485_GPIO_Port GPIOC
+#define RXD_RS485_Pin GPIO_PIN_7
+#define RXD_RS485_GPIO_Port GPIOC
+#define DPY4_Pin GPIO_PIN_6
+#define DPY4_GPIO_Port GPIOG
+#define DPY5_Pin GPIO_PIN_7
+#define DPY5_GPIO_Port GPIOG
+#define WDI_Pin GPIO_PIN_10
+#define WDI_GPIO_Port GPIOF
+#define DPY6_Pin GPIO_PIN_2
+#define DPY6_GPIO_Port GPIOG
+#define DPY7_Pin GPIO_PIN_13
+#define DPY7_GPIO_Port GPIOD
+#define RS_Pin GPIO_PIN_3
+#define RS_GPIO_Port GPIOH
+#define ETH_RMII_ERR_Pin GPIO_PIN_6
+#define ETH_RMII_ERR_GPIO_Port GPIOH
+  USER CODE BEGIN Private defines */
+
+#include "main.h"
+
+#define PWR_OFF_Pin MED_FREQ_Pin
+#define PWR_OFF_GPIO_Port MED_FREQ_GPIO_Port
+
+#if EQUIP_COM_ST== MD4060_EQUIP
+
+
+ /* LISTA DE PINOS E PORTAS
+DPY_WR_Pin
+DPY_WR_GPIO_Port
+AUXOUT3_Pin
+AUXOUT3_GPIO_Port
+TOUCH_INT_Pin
+TOUCH_INT_GPIO_Port
+TCL4_Pin
+TCL4_GPIO_Port
+AUXOUT2_Pin
+AUXOUT2_GPIO_Port
+TCL2_Pin
+TCL2_GPIO_Port
+TCL3_Pin
+TCL3_GPIO_Port
+SPI2_NSS_Pin
+SPI2_NSS_GPIO_Port
+AUXOUT1_Pin
+AUXOUT1_GPIO_Port
+RS_HAB_SERV_Pin
+RS_HAB_SERV_GPIO_Port
+TCL1_Pin
+TCL1_GPIO_Port
+TCL5_Pin
+TCL5_GPIO_Port
+TCL6_Pin
+TCL6_GPIO_Port
+TOUCH_RESET_Pin
+TOUCH_RESET_GPIO_Port
+WDI_Pin  3
+WDI_GPIO_Port
+USB_OTG_VBUS_Pin
+USB_OTG_VBUS_GPIO_Port
+LTDC_R6_Pin
+LTDC_R6_GPIO_Port
+DPY_CS_Pin
+DPY_CS_GPIO_Port
+ADC6P_Pin
+ADC6P_GPIO_Port
+MED_FREQ_Pin
+MED_FREQ_GPIO_Port
+DPY0_Pin
+DPY0_GPIO_Port
+ADC1P_Pin GPIO_PIN_0
+ADC1P_GPIO_Port
+DPY7_Pin
+DPY7_GPIO_Port
+ETH_REF_CLK_Pin
+ETH_REF_CLK_GPIO_Port
+ETH_MDIO_Pin
+ETH_MDIO_GPIO_Port
+ADC2P_Pin
+ADC2P_GPIO_Port
+ETH_CRS_DV_Pin
+ETH_CRS_DV_GPIO_Port
+ADC5P_Pin
+ADC5P_GPIO_Port
+DPY6_Pin
+DPY6_GPIO_Port
+I2C2_SDA_Pin
+I2C2_SDA_GPIO_Port
+PWD_Pin
+PWD_GPIO_Port
+I2C2_SCL_Pin
+I2C2_SCL_GPIO_Port
+DPY3_Pin
+DPY3_GPIO_Port
+DPY4_Pin
+DPY4_GPIO_Port
+DPY5_Pin
+DPY5_GPIO_Port
+ETH_RMII_ERR_Pin
+ETH_RMII_ERR_GPIO_Port
+DAC_OUT2_Pin
+DAC_OUT2_GPIO_Port
+DPY2_Pin
+DPY2_GPIO_Port
+DAC_OUT1_Pin
+DAC_OUT1_GPIO_Port
+ADC3P_Pin
+ADC3P_GPIO_Port
+ADC4P_Pin GPIO_PIN_0
+ADC4P_GPIO_Port
+DPY1_Pin
+DPY1_GPIO_Port
+*/
+
+
+
+#define NUM_PINOS 21
+uint32_t portaMapped[NUM_PINOS][3]={  //pino, porta, pino,porta
+ 				{ 1<<25, 0, AUXOUT1_Pin  }, //BACKLIGHT_Pin
+				{ 1<<0 , 0, TCL3_Pin    },
+				{ 1<<1 , 0, TCL4_Pin  },
+				{ 1<<10, 0, TCL5_Pin  },
+				{ 1<<11, 0, TCL6_Pin  },
+				{ 1<<20, 0,  DPY_WR_Pin},    ///RS_Pin
+				{ 1<<5 , 0, TCL1_Pin  },
+				{ 1<<4 , 0, RS_HAB_SERV_Pin  },
+				{ 1<<26,  1, MED_FREQ_Pin },
+				{ 1<<28,  1, PWR_OFF_Pin  },
+				{ 1<<29,  1, TCL2_Pin	  },
+				{ 1<<12, 2, PWD_Pin    },
+				{ 1<<11, 2, WDI_Pin    },
+				{ 1<<0,  2, DPY0_Pin  },
+				{ 1<<1,  2, DPY1_Pin  },
+				{ 1<<2,  2, DPY2_Pin  },
+				{ 1<<3,  2, DPY3_Pin  },
+				{ 1<<4,  2, DPY4_Pin  },
+				{ 1<<5,  2, DPY5_Pin  },
+				{ 1<<6,  2, DPY6_Pin  },
+				{ 1<<7,  2, DPY7_Pin  }
+		};
+
+ GPIO_TypeDef *portaST[NUM_PINOS][1]={  //pino, porta, pino,porta
+  		{ AUXOUT1_GPIO_Port   },
+  		{ TCL3_GPIO_Port  },
+  		{ TCL4_GPIO_Port },
+  		{ TCL5_GPIO_Port},
+  		{ TCL6_GPIO_Port},
+  		{ DPY_WR_GPIO_Port},
+  		{ TCL1_GPIO_Port },
+  		{ RS_HAB_SERV_GPIO_Port },
+		{ MED_FREQ_GPIO_Port  },
+  		{ PWR_OFF_GPIO_Port	},
+  		{ TCL2_GPIO_Port },
+		{  PWD_GPIO_Port  },
+  		{  WDI_GPIO_Port  },
+  		{  DPY0_GPIO_Port },
+  		{  DPY1_GPIO_Port },
+  		{  DPY2_GPIO_Port },
+  		{  DPY3_GPIO_Port },
+  		{  DPY4_GPIO_Port },
+  		{  DPY5_GPIO_Port },
+  		{  DPY6_GPIO_Port },
+  		{  DPY7_GPIO_Port }
+  };
+
+
+
+#endif
+
+
+#if EQUIP_COM_ST==TR_EQUIP
+/*
+ BACKLIGHT				 DPY7					 DPY_RST/EAD1R3
+ SPI_CLK                 DPY6                    DPY_ENA/EAD1R1
+ SPI_SSEL                DPY5                    DPY_CLK/EAD1R2
+ SPI_MISO                DPY4                    DPY_WR/LCD_CS
+ SPI_MOSI                DPY3                    DPY_RS
+ MED_FREQ                DPY2
+ TLC1                    DPY1
+ TLC2                    DPY0
+ TLC3                    TXD_RS485
+ TL4                     RXD_RS485
+ TL5                     HAB_SER_RS485
+ TL6                     LED_RX/REL2_CS
+ WDI                     LED_TX/REL1_CS
+ PWD                     REL_OE
+*/
+
+#define NUM_PINOS 21
+uint32_t portaMapped[NUM_PINOS][3]={  //pino, porta, pino,porta
+		{ 1<<26, 1, MED_FREQ_Pin },
+		{ 1<<12, 2, PWD_Pin      },
+		{ 1<<20, 0, DPY_WR_Pin   }, //DPY_WR/LCD_CS
+		{ 1<<19, 0, DPY_RS_Pin   },
+    	{ 1<<15, 0, WDI_Pin      },
+
+		{ 1<<16, 0, DPY_RST_Pin  },
+		{ 1<< 9, 2, DPY_CLK_Pin  },
+		{ 1<< 8, 2, DPY_ENA_Pin  },
+
+
+		{ 1<<0,  2, DPY0_Pin  },
+		{ 1<<1,  2, DPY1_Pin  },
+		{ 1<<2,  2, DPY2_Pin  },
+		{ 1<<3,  2, DPY3_Pin  },
+		{ 1<<4,  2, DPY4_Pin  },
+		{ 1<<5,  2, DPY5_Pin  },
+		{ 1<<6,  2, DPY6_Pin  },
+		{ 1<<7,  2, DPY7_Pin  },
+
+		{ 1<< 8, 0, LED_RX_Pin      },
+		{ 1<< 7, 0, LED_TX_Pin      },
+		{ 1<<5 , 0, TL1_Pin  		},
+		{ 1<<4 , 0, HAB_SER_RS485_Pin  }
+		};
+
+
+
+
+#endif
+#if EQUIP_COM_ST==CM_EQUIP
+
+
+
+
+#endif
+#if ((EQUIP_COM_ST==CA_EQUIP) ||(EQUIP_COM_ST==CP_EQUIP))
+
+#define NUM_PINOS 21
+uint32_t portaMapped[NUM_PINOS][3]={  //pino, porta, pino,porta
+		{ 1<<26, 1, MED_FREQ_Pin },
+
+		{ 1<<10 , 0, TL5_Pin  		},
+		{ 1<<11 , 0, TL6_Pin  		},
+
+		{ 1<<12, 2, PWD_Pin      },
+		{ 1<<20, 0, DPY_WR_Pin   }, //DPY_WR/LCD_CS
+		{ 1<<19, 0, DPY_RS_Pin   },
+		{ 1<<18, 0, DPY_ENA_Pin  },  //DISPLAY WR7SEG
+
+    	{ 1<<15, 0, WDI_Pin      },
+
+		{ 1<<16, 0, DPY_RST_Pin  },
+
+
+
+		{ 1<<0,  2, DPY0_Pin  },
+		{ 1<<1,  2, DPY1_Pin  },
+		{ 1<<2,  2, DPY2_Pin  },
+		{ 1<<3,  2, DPY3_Pin  },
+		{ 1<<4,  2, DPY4_Pin  },
+		{ 1<<5,  2, DPY5_Pin  },
+		{ 1<<6,  2, DPY6_Pin  },
+		{ 1<<7,  2, DPY7_Pin  },
+
+
+		{ 1<<5 , 0, TL1_Pin  		},
+		{ 1<<4 , 0, HAB_SER_RS485_Pin  } //LED POWER?
+		};
+
+
+
+#endif
+
+
+
+uint32_t LerPinosEmPorta(uint32_t PortaLPC, uint32_t mascara){
+//aqui deve ser feito o mapeamento para as portas do STM32
+uint32_t output;
+
+int i,m;
+uint32_t um=1,mask_um;
+uint32_t  pinoMapeado;
+
+
+	for (i=0;i<32;i++)
+	{
+
+		mask_um=um<<i;
+		if((mascara&mask_um)==mask_um)
+		{
+			//aqui tenho que testar um bit em particular da porta.
+			pinoMapeado=0;
+
+			for  (m=0;m<NUM_PINOS;m++) // vou buscar se o pino está mapeado...
+			{
+				if ((portaMapped[m][0]==mask_um)&&(portaMapped[m][1]==PortaLPC))
+				{
+					pinoMapeado=1;
+					break;
+				}
+
+			}
+			if (pinoMapeado==0)
+			{
+			  break; //tratar aqui, pino não mapeado.
+
+			}
+			else
+			{
+				//HAL_GPIO_ReadPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+				if (HAL_GPIO_ReadPin( portaST[m][0],(uint16_t) portaMapped[m][2])!=0)
+					output=output|mask_um;
+			}
+		}
+	}
+
+
+
+
+return output;
+}
+
+
+
+//void EscreverPinosEmPorta(uint32_t PortaLPC,uint32_t mascara){
+//aqui deve ser feito o mapeamento para as portas do STM32
+//}
+
+void SETpinoEmPorta(uint32_t PortaLPC,uint32_t mascara){
+//aqui deve ser feito o mapeamento para as portas do STM32
+
+
+	int i,m;
+	uint32_t um=1,mask_um;
+	uint32_t  pinoMapeado;
+
+
+		for (i=0;i<32;i++)
+		{
+
+			mask_um=um<<i;
+			if((mascara&mask_um)==mask_um)
+			{
+				//aqui tenho que testar um bit em particular da porta.
+				pinoMapeado=0;
+
+				for  (m=0;m<NUM_PINOS;m++) // vou buscar se o pino está mapeado...
+				{
+					if ((portaMapped[m][0]==mask_um)&&(portaMapped[m][1]==PortaLPC))
+					{
+						pinoMapeado=1;
+						break;
+					}
+
+				}
+				if (pinoMapeado==0)
+				{
+				  break; //tratar aqui, pino não mapeado.
+
+				}
+				else
+				{
+					//void HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
+					  HAL_GPIO_WritePin( portaST[m][0],(uint16_t) portaMapped[m][2],GPIO_PIN_SET);
+
+				}
+			}
+		}
+
+}
+
+void CLRpinoEmPorta(uint32_t PortaLPC,uint32_t mascara){
+//aqui deve ser feito o mapeamento para as portas do STM32
+
+
+	int i,m;
+	uint32_t um=1,mask_um;
+	uint32_t  pinoMapeado;
+
+
+		for (i=0;i<32;i++)
+		{
+
+			mask_um=um<<i;
+			if((mascara&mask_um)==mask_um)
+			{
+				//aqui tenho que testar um bit em particular da porta.
+				pinoMapeado=0;
+
+				for  (m=0;m<NUM_PINOS;m++) // vou buscar se o pino está mapeado...
+				{
+					if ((portaMapped[m][0]==mask_um)&&(portaMapped[m][1]==PortaLPC))
+					{
+						pinoMapeado=1;
+						break;
+					}
+
+				}
+				if (pinoMapeado==0)
+				{
+				  break; //tratar aqui, pino não mapeado.
+
+				}
+				else
+				{
+					//void HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
+					  HAL_GPIO_WritePin( portaST[m][0],(uint16_t) portaMapped[m][2],GPIO_PIN_RESET);
+
+				}
+			}
+		}
+
+}
+
+
+
+void DisableAllInterrupts(void){}
+void DisablePoweDownInterrupt(void){}
+void EnablePoweDownInterrupt(void){}
+
+

@@ -1,0 +1,6 @@
+
+1.34 - Primeira versão power 5000 para placa revisão 1, duas entradas.
+
+1.38 - Segunda versão power 5000 para placa revisão 2, duas entradas com marca de tempo na mudança de estado.
+
+1.39 - versão power 5000 para equipamento placa rev3, 2 entradas com marca de tempo na mudança de estado. (6 entradas implemetadas sem controle da mudança mas possível de se monitorar via SP4K/5K).

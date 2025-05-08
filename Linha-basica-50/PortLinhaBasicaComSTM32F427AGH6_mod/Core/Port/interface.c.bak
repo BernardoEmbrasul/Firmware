@@ -1,0 +1,3804 @@
+
+/*****************************************************************************
+ *   interface.c:  Aqui se encontram as rotinas de interfaceamento com
+ * 	 o usu�rio (telas, teclado, etc...)
+ *
+ *   Projeto MD2010-ARM
+ *
+ *   History
+ *   2006.29.05  ver. codigo 1.00  Vers�o Preliminar.
+ *
+ *
+ ******************************************************************************/
+#undef EXT
+#define EXT extern
+#include "global.h"
+
+
+#if EQUIP!=CM_EQUIP
+
+//char const tela_apresentacao[]="    []d 4000 1p00";
+
+typedef struct Teclas
+{
+	BYTE null;
+	BYTE up;
+	BYTE down;
+	BYTE left;
+	BYTE rigth;
+	BYTE esc;
+	BYTE prog;
+} Teclas;
+
+Teclas FuncoesDasTeclas[NUMERO_DE_TELAS];
+
+
+/*
+   Inicializa Funcao Das Teclas
+ */
+void TecladoInit()
+{
+	int i;
+	/*Nas telas de exibi��o, todas as teclas tem a mesma fun��o*/
+	for (i=INICIO_TELAS_DE_EXIBICAO;i<=FIM_TELAS_DE_EXIBICAO;i++)
+	{
+		FuncoesDasTeclas[i].null = NONE;
+		FuncoesDasTeclas[i].up	 = NONE;
+		FuncoesDasTeclas[i].down = NONE;
+		FuncoesDasTeclas[i].left = GOTO_TELA_ANTERIOR;
+		FuncoesDasTeclas[i].rigth= GOTO_TELA_PROXIMA;
+		FuncoesDasTeclas[i].esc	 = NONE;
+		FuncoesDasTeclas[i].prog = ENTRA_MODO_PRG;
+	}
+
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].up   = GOTO_REL_TP_PRI_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].down = GOTO_REL_TP_PRI_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].esc  = ABANDONA_PROG_REL_TP_PRI;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_PRI_MOD].prog = GRAVA_PROG_REL_TP_PRI;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].up   = GOTO_REL_TP_SEC_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].down = GOTO_REL_TP_SEC_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].esc  = ABANDONA_PROG_REL_TP_SEC;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_SEC_MOD].prog = GRAVA_PROG_REL_TP_SEC;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].up   = GOTO_REL_TP_FAT_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].down = GOTO_REL_TP_FAT_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].esc  = ABANDONA_PROG_REL_TP_FAT;
+	FuncoesDasTeclas[TELA_PROG_REL_TP_FAT_MOD].prog = GRAVA_PROG_REL_TP_FAT;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].up   = GOTO_REL_TC_PRI_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].down = GOTO_REL_TC_PRI_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].esc  = ABANDONA_PROG_REL_TC_PRI;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_PRI_MOD].prog = GRAVA_PROG_REL_TC_PRI;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].up   = GOTO_REL_TC_SEC_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].down = GOTO_REL_TC_SEC_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].esc  = ABANDONA_PROG_REL_TC_SEC;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_SEC_MOD].prog = GRAVA_PROG_REL_TC_SEC;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].up   = GOTO_REL_TC_FAT_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].down = GOTO_REL_TC_FAT_MOD;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].esc  = ABANDONA_PROG_REL_TC_FAT;
+	FuncoesDasTeclas[TELA_PROG_REL_TC_FAT_MOD].prog = GRAVA_PROG_REL_TC_FAT;
+
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].up   = GOTO_RESET_CONSUMO_MOD;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].down = GOTO_RESET_CONSUMO_MOD;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].up   = ALTERA_SIM_NAO;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].down = ALTERA_SIM_NAO;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].left = ALTERA_SIM_NAO;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].rigth= ALTERA_SIM_NAO;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].esc  = ABANDONA_PROG_RESET_CONSUMO;
+	FuncoesDasTeclas[TELA_PROG_RESET_CONSUMO_MOD].prog = GRAVA_PROG_RESET_CONSUMO;
+
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].up   = GOTO_ESCRAVO_MODBUS_MOD;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].down = GOTO_ESCRAVO_MODBUS_MOD;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].esc  = ABANDONA_PROG_ESCRAVO_MODBUS;
+	FuncoesDasTeclas[TELA_PROG_ESCRAVO_MODBUS_MOD].prog = GRAVA_PROG_ESCRAVO_MODBUS;
+
+
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].up   = GOTO_BAUD_RATE_MOD;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].down = GOTO_BAUD_RATE_MOD;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].up   = INCREMENTA_BAUD_RATE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].down = DECREMENTA_BAUD_RATE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].left = DECREMENTA_BAUD_RATE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].rigth= INCREMENTA_BAUD_RATE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].esc  = ABANDONA_PROG_BAUD_RATE;
+	FuncoesDasTeclas[TELA_PROG_BAUD_RATE_MOD].prog = GRAVA_PROG_BAUD_RATE;
+
+
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].up   = GOTO_PARIDADE_STOPS_MOD;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].down = GOTO_PARIDADE_STOPS_MOD;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].up   = INCREMENTA_PARIDADE_STOPS;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].down = DECREMENTA_PARIDADE_STOPS;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].left = DECREMENTA_PARIDADE_STOPS;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].rigth= INCREMENTA_PARIDADE_STOPS;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].esc  = ABANDONA_PROG_PARIDADE_STOPS;
+	FuncoesDasTeclas[TELA_PROG_PARIDADE_STOPS_MOD].prog = GRAVA_PROG_PARIDADE_STOPS;
+
+	//#ifdef SEM_ETHERNET NAO
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].up   = GOTO_IP_OCTETO1_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].down = GOTO_IP_OCTETO1_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].esc  = ABANDONA_PROG_IP_OCTETO1;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO1_MOD].prog = GRAVA_PROG_IP_OCTETO1;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].up   = GOTO_IP_OCTETO2_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].down = GOTO_IP_OCTETO2_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].left = GOTO_TELA_ANTERIOR ;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].rigth= GOTO_TELA_PROXIMA ;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].esc  = ABANDONA_PROG_IP_OCTETO2;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO2_MOD].prog = GRAVA_PROG_IP_OCTETO2;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].up   = GOTO_IP_OCTETO3_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].down = GOTO_IP_OCTETO3_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].esc  = ABANDONA_PROG_IP_OCTETO3;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO3_MOD].prog = GRAVA_PROG_IP_OCTETO3;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].up   = GOTO_IP_OCTETO4_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].down = GOTO_IP_OCTETO4_MOD;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].esc  = ABANDONA_PROG_IP_OCTETO4;
+	FuncoesDasTeclas[TELA_PROG_IP_OCTETO4_MOD].prog = GRAVA_PROG_IP_OCTETO4;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].up   = GOTO_MK_OCTETO1_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].down = GOTO_MK_OCTETO1_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].esc  = ABANDONA_PROG_MK_OCTETO1;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO1_MOD].prog = GRAVA_PROG_MK_OCTETO1;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].up   = GOTO_MK_OCTETO2_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].down = GOTO_MK_OCTETO2_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].left = GOTO_TELA_ANTERIOR ;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].rigth= GOTO_TELA_PROXIMA ;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].esc  = ABANDONA_PROG_MK_OCTETO2;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO2_MOD].prog = GRAVA_PROG_MK_OCTETO2;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].up   = GOTO_MK_OCTETO3_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].down = GOTO_MK_OCTETO3_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].esc  = ABANDONA_PROG_MK_OCTETO3;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO3_MOD].prog = GRAVA_PROG_MK_OCTETO3;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].up   = GOTO_MK_OCTETO4_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].down = GOTO_MK_OCTETO4_MOD;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].esc  = ABANDONA_PROG_MK_OCTETO4;
+	FuncoesDasTeclas[TELA_PROG_MK_OCTETO4_MOD].prog = GRAVA_PROG_MK_OCTETO4;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].up   = GOTO_GW_OCTETO1_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].down = GOTO_GW_OCTETO1_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].esc  = ABANDONA_PROG_GW_OCTETO1;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO1_MOD].prog = GRAVA_PROG_GW_OCTETO1;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].up   = GOTO_GW_OCTETO2_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].down = GOTO_GW_OCTETO2_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].left = GOTO_TELA_ANTERIOR ;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].rigth= GOTO_TELA_PROXIMA ;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].esc  = ABANDONA_PROG_GW_OCTETO2;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO2_MOD].prog = GRAVA_PROG_GW_OCTETO2;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].up   = GOTO_GW_OCTETO3_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].down = GOTO_GW_OCTETO3_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].esc  = ABANDONA_PROG_GW_OCTETO3;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO3_MOD].prog = GRAVA_PROG_GW_OCTETO3;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].up   = GOTO_GW_OCTETO4_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].down = GOTO_GW_OCTETO4_MOD;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].up   = INCREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].down = DECREMENTA_ALGARISMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].left = GOTO_ALG_ANTERIOR_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].rigth= GOTO_ALG_PROXIMO_BYTE;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].esc  = ABANDONA_PROG_GW_OCTETO4;
+	FuncoesDasTeclas[TELA_PROG_GW_OCTETO4_MOD].prog = GRAVA_PROG_GW_OCTETO4;
+
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].up   = GOTO_NRO_PORTA_MOD;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].down = GOTO_NRO_PORTA_MOD;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].left = GOTO_TELA_ANTERIOR;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].rigth= GOTO_TELA_PROXIMA;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].esc  = SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA].prog = GOTO_TELA_GRAVAR_SIM_NAO;
+
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].up   = INCREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].down = DECREMENTA_ALGARISMO_INT;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].left = GOTO_ALG_ANTERIOR_INT;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].rigth= GOTO_ALG_PROXIMO_INT;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].esc  = ABANDONA_PROG_NRO_PORTA;
+	FuncoesDasTeclas[TELA_PROG_NRO_PORTA_MOD].prog = GRAVA_PROG_NRO_PORTA;
+	//#endif
+
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].null = NONE;
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].up   = ALTERA_SIM_NAO_G;
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].down = ALTERA_SIM_NAO_G;
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].left = ALTERA_SIM_NAO_G;
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].rigth= ALTERA_SIM_NAO_G;
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].esc  = VOLTA_AO_MODO_PROGRAMACAO; //SAIR_MODO_PRG_SEM_GRAVAR;
+	FuncoesDasTeclas[TELA_PROG_GRAVAR_SIM_NAO_MOD].prog = SAIR_MODO_PRG_POSSIVELMENTE_GRAVANDO;
+
+	inicializa_funcao_teclas(TELA_APRESENTACAO);
+	ultimaTeclaExecutada = ~teclaAtual;
+};
+/*
+   Executa a funcao passada como parametro
+ */
+void executaFuncao(int funcao){
+
+	setDpyPiscante(NENHUM_PISCANDO,NENHUM_PISCANDO);
+
+	switch (funcao){
+
+		case GOTO_ESCRAVO_MODBUS_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)MeuEnderecoMODBUS_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_ESCRAVO_MODBUS_MOD;
+				break;
+			}
+
+		case GOTO_BAUD_RATE_MOD:
+			{
+				setDpyPiscante(8,11);
+				telaAtual=TELA_PROG_BAUD_RATE_MOD;
+				break;
+			}
+
+		case GOTO_PARIDADE_STOPS_MOD:
+			{
+				setDpyPiscante(8,11);
+				telaAtual=TELA_PROG_PARIDADE_STOPS_MOD;
+				break;
+			}
+
+		case GOTO_IP_OCTETO1_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)IPOcteto1_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO1_MOD;
+				break;
+			}
+		case GOTO_IP_OCTETO2_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)IPOcteto2_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO2_MOD;
+				break;
+			}
+		case GOTO_IP_OCTETO3_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)IPOcteto3_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO3_MOD;
+				break;
+			}
+		case GOTO_IP_OCTETO4_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)IPOcteto4_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO4_MOD;
+				break;
+			}
+		case GOTO_MK_OCTETO1_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)MKOcteto1_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO1_MOD;
+				break;
+			}
+		case GOTO_MK_OCTETO2_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)MKOcteto2_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO2_MOD;
+				break;
+			}
+		case GOTO_MK_OCTETO3_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)MKOcteto3_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO3_MOD;
+				break;
+			}
+		case GOTO_MK_OCTETO4_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)MKOcteto4_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO4_MOD;
+				break;
+			}
+		case GOTO_GW_OCTETO1_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)GWOcteto1_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO1_MOD;
+				break;
+			}
+		case GOTO_GW_OCTETO2_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)GWOcteto2_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO2_MOD;
+				break;
+			}
+		case GOTO_GW_OCTETO3_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)GWOcteto3_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO3_MOD;
+				break;
+			}
+		case GOTO_GW_OCTETO4_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)GWOcteto4_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO4_MOD;
+				break;
+			}
+		case GOTO_NRO_PORTA_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD((unsigned short)NroPorta_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_NRO_PORTA_MOD;
+				break;
+			}
+
+		case GOTO_TELA_GRAVAR_SIM_NAO:
+			telaAtual=TELA_PROG_GRAVAR_SIM_NAO_MOD;
+		case ALTERA_SIM_NAO_G:
+			{
+				if (SairGravando=='S') {SairGravando='n';} else{SairGravando='S';}
+				break;
+			}
+
+		case GOTO_RESET_CONSUMO_MOD:
+		case ALTERA_SIM_NAO:
+			{
+				if (zeraConsumos=='S') {zeraConsumos='n';} else{zeraConsumos='S';}
+				telaAtual=TELA_PROG_RESET_CONSUMO_MOD;
+				break;
+			}
+		case GOTO_TELA_PROXIMA:
+			{
+				proximaTela(tela2); break;
+			}
+		case GOTO_TELA_ANTERIOR:
+			{
+				proximaTela(tela1); break;
+			}
+		case ENTRA_MODO_PRG:
+			{
+				estou_no_modo_de_programacao=SIM;
+				relacaoTPpri_temp=relacaoTPpri;
+				relacaoTPsec_temp=relacaoTPsec;
+				relacaoTPfat_temp=relacaoTPfat;
+				relacaoTCpri_temp=relacaoTCpri;
+				relacaoTCsec_temp=relacaoTCsec;
+				relacaoTCfat_temp=relacaoTCfat;
+				MeuEnderecoMODBUS_temp=MeuEnderecoMODBUS;
+				BaudRate_temp=BaudRatex;
+				ParidadeStops_temp=ParidadeStops;
+				IPOcteto1_temp=IPOcteto1;
+				IPOcteto2_temp=IPOcteto2;
+				IPOcteto3_temp=IPOcteto3;
+				IPOcteto4_temp=IPOcteto4;
+				MKOcteto1_temp=MKOcteto1;
+				MKOcteto2_temp=MKOcteto2;
+				MKOcteto3_temp=MKOcteto3;
+				MKOcteto4_temp=MKOcteto4;
+				GWOcteto1_temp=GWOcteto1;
+				GWOcteto2_temp=GWOcteto2;
+				GWOcteto3_temp=GWOcteto3;
+				GWOcteto4_temp=GWOcteto4;
+				NroPorta_temp=NroPorta;
+				zeraConsumos='n';
+				SairGravando='n';
+				telaAtual=INICIO_TELAS_DE_PROGRAMACAO;
+				InttoBCD(relacaoTPpri_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+
+				break;
+			}
+		case SAIR_MODO_PRG_SEM_GRAVAR:
+			{
+				estou_no_modo_de_programacao=NAO;
+				telaAtual=INICIO_TELAS_DE_EXIBICAO;
+				tela1=FIM_TELAS_DE_EXIBICAO;
+				tela2=INICIO_TELAS_DE_EXIBICAO;
+				break;
+			}
+
+		case VOLTA_AO_MODO_PROGRAMACAO:
+			{
+				telaAtual=INICIO_TELAS_DE_PROGRAMACAO;
+				break;
+			}
+
+		case SAIR_MODO_PRG_POSSIVELMENTE_GRAVANDO:
+			{
+				estou_no_modo_de_programacao=NAO;
+				if (SairGravando=='S')
+				{
+					relacaoTPpri=relacaoTPpri_temp;
+					relacaoTPsec=relacaoTPsec_temp;
+					relacaoTPfat=relacaoTPfat_temp;
+					relacaoTCpri=relacaoTCpri_temp;
+					relacaoTCsec=relacaoTCsec_temp;
+					relacaoTCfat=relacaoTCfat_temp;
+					MeuEnderecoMODBUS=MeuEnderecoMODBUS_temp;
+					ParidadeStops=ParidadeStops_temp;
+					BaudRatex=BaudRate_temp;
+					IPOcteto1=IPOcteto1_temp;
+					IPOcteto2=IPOcteto2_temp;
+					IPOcteto3=IPOcteto3_temp;
+					IPOcteto4=IPOcteto4_temp;
+					MKOcteto1=MKOcteto1_temp;
+					MKOcteto2=MKOcteto2_temp;
+					MKOcteto3=MKOcteto3_temp;
+					MKOcteto4=MKOcteto4_temp;
+					GWOcteto1=GWOcteto1_temp;
+					GWOcteto2=GWOcteto2_temp;
+					GWOcteto3=GWOcteto3_temp;
+					GWOcteto4=GWOcteto4_temp;
+					NroPorta=NroPorta_temp;
+					/*
+					   IPOcteto1=ip_config.IpAdr[0]  ;           // Local IP Address
+					   IPOcteto2=ip_config.IpAdr[1]  ;           // Local IP Address
+					   IPOcteto3=ip_config.IpAdr[2]  ;           // Local IP Address
+					   IPOcteto4=ip_config.IpAdr[3 ] ;           // Local IP Address
+					   GWOcteto1=ip_config.DefGW[0 ] ;           // Default GateWay
+					   GWOcteto2=ip_config.DefGW[1]  ;           // Default GateWay
+					   GWOcteto3=ip_config.DefGW[2]  ;           // Default GateWay
+					   GWOcteto4=ip_config.DefGW[3]  ;           // Default GateWay
+					   MKOcteto1=ip_config.NetMask[0];         // Net Mask
+					   MKOcteto2=ip_config.NetMask[1];         // Net Mask
+					   MKOcteto3=ip_config.NetMask[2];         // Net Mask
+					   MKOcteto4=ip_config.NetMask[3];         // Net Mask */
+
+					ip_config.IpAdr[0]  =(U8)IPOcteto1;           // Local IP Address
+					ip_config.IpAdr[1]  =(U8)IPOcteto2;           // Local IP Address
+					ip_config.IpAdr[2]  =(U8)IPOcteto3;           // Local IP Address
+					ip_config.IpAdr[3]  =(U8)IPOcteto4;           // Local IP Address
+					ip_config.DefGW[0]  =(U8)GWOcteto1;           // Default GateWay
+					ip_config.DefGW[1]  =(U8)GWOcteto2;           // Default GateWay
+					ip_config.DefGW[2]  =(U8)GWOcteto3;           // Default GateWay
+					ip_config.DefGW[3]  =(U8)GWOcteto4;           // Default GateWay
+					ip_config.NetMask[0]=(U8)MKOcteto1;         // Net Mask
+					ip_config.NetMask[1]=(U8)MKOcteto2;         // Net Mask
+					ip_config.NetMask[2]=(U8)MKOcteto3;         // Net Mask
+					ip_config.NetMask[3]=(U8)MKOcteto4;         // Net Mask
+					ip_config.PriDNS[0] =10;          // Primary DNS Server
+					ip_config.PriDNS[1] =10;          // Primary DNS Server
+					ip_config.PriDNS[2] =0;          // Primary DNS Server
+					ip_config.PriDNS[3] =1;          // Primary DNS Server
+					ip_config.SecDNS[0] =10;         // Secondary DNS Server
+					ip_config.SecDNS[1] =10;         // Secondary DNS Server
+					ip_config.SecDNS[2] =0;          // Secondary DNS Server
+					ip_config.SecDNS[3] =1;          // Secondary DNS Server
+
+					refresh_ip();
+
+					UARTInit(BaudRatex,ParidadeStops);
+					SalvaParametrizacao();
+				}
+
+				telaAtual=INICIO_TELAS_DE_EXIBICAO;
+				tela1=FIM_TELAS_DE_EXIBICAO;
+				tela2=INICIO_TELAS_DE_EXIBICAO;
+
+				break;
+			}
+		case GOTO_REL_TP_PRI_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD(relacaoTPpri_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_REL_TP_PRI_MOD;
+				break;
+			}
+		case GOTO_REL_TP_SEC_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD(relacaoTPsec_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_REL_TP_SEC_MOD;
+				break;
+			}
+
+		case GOTO_REL_TP_FAT_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD(relacaoTPfat_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_REL_TP_FAT_MOD;
+				break;
+			}
+		case GOTO_REL_TC_PRI_MOD:
+			{
+
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD(relacaoTCpri_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_REL_TC_PRI_MOD;
+				break;
+			}
+		case GOTO_REL_TC_SEC_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD(relacaoTCsec_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_REL_TC_SEC_MOD;
+				break;
+			}
+
+		case GOTO_REL_TC_FAT_MOD:
+			{
+				setDpyPiscante(UNIDADE,UNIDADE);
+				currentAlgarismo=UNIDADE;
+				InttoBCD(relacaoTCfat_temp,&tempMil,&tempCen,&tempDez,&tempUni);
+				telaAtual=TELA_PROG_REL_TC_FAT_MOD;
+				break;
+			}
+
+
+		case INCREMENTA_ALGARISMO_INT:
+			{
+				//incrementa o algarismo atual (current)
+				switch(currentAlgarismo)
+				{
+					case UNIDADE://unidade
+						{
+							if (tempUni<9){tempUni++;} else { tempUni=0; }
+							break;
+						}
+					case DEZENA://dezena
+						{
+							if (tempDez<9){tempDez++;} else { tempDez=0; }
+							break;
+						}
+					case CENTENA://centena
+						{
+							if (tempCen<9){tempCen++;} else { tempCen=0; }
+							break;
+						}
+					case MILHAR://milhar
+						{
+							if (tempMil<9){tempMil++;} else { tempMil=0; }
+							break;
+						}
+				}
+				break;
+			}
+		case DECREMENTA_ALGARISMO_INT:
+			{
+				//decrementa o algarismo atual (current)
+				switch(currentAlgarismo)
+				{
+					case UNIDADE://unidade
+						{
+							if (tempUni==0){tempUni=9;} else { tempUni--; }
+							break;
+						}
+					case DEZENA://dezena
+						{
+							if (tempDez==0){tempDez=9;} else { tempDez--; }
+							break;
+						}
+					case CENTENA://centena
+						{
+							if (tempCen==0){tempCen=9;} else { tempCen--; }
+							break;
+						}
+					case MILHAR://milhar
+						{
+							if (tempMil==0){tempMil=9;} else { tempMil--; }
+							break;
+						}
+				}
+				break;
+			}
+		case GOTO_ALG_PROXIMO_INT:
+			{
+				//muda para o algarismo proximo, current+1
+				currentAlgarismo++; if (currentAlgarismo>UNIDADE) {currentAlgarismo=MILHAR;}
+				break;
+			}
+		case GOTO_ALG_ANTERIOR_INT:
+			{
+				//muda para o algarismo anterior, current-1
+				currentAlgarismo--; if (currentAlgarismo<MILHAR) {currentAlgarismo=UNIDADE;}
+				break;
+			}
+
+		case INCREMENTA_ALGARISMO_BYTE:
+			{
+				//incrementa o algarismo atual (current)
+				switch(currentAlgarismo)
+				{
+					case UNIDADE://unidade
+						{
+
+							if (tempCen==2)
+							{
+								if (tempDez==5)
+								{
+									if (tempUni<5){tempUni++;} else { tempUni=0; }
+								}
+								else
+								{
+									if (tempUni<9){tempUni++;} else { tempUni=0; }
+								}
+							}
+							else
+							{
+								if (tempUni<9){tempUni++;} else { tempUni=0; }
+							}
+
+							break;
+						}
+					case DEZENA://dezena
+						{
+
+
+							if (tempCen==2)
+							{
+								if (tempDez<5){
+									tempDez++;
+								}
+								if (tempDez==5){
+									if (tempUni>5){ tempUni=5; }
+								}
+							}
+							else
+							{
+								if (tempDez<9){tempDez++;} else { tempDez=0; }
+							}
+
+							break;
+						}
+					case CENTENA://centena
+						{
+
+							if (tempCen==2){
+								tempCen=0;
+							}
+							else
+							{
+								tempCen++;
+								if (tempCen==2)
+								{
+									if (tempDez>=5)
+									{
+										tempDez=5;
+										if (tempUni>5) { tempUni=5; }
+									}
+								}
+							}
+							break;
+						}
+				}//fim do switch currentAlgarismo
+				break;
+			}
+		case DECREMENTA_ALGARISMO_BYTE:
+			{
+				//decrementa o algarismo atual (current)
+				switch(currentAlgarismo)
+				{
+					case UNIDADE://unidade
+						{
+
+							if (tempCen==2)
+							{
+								if (tempDez==5){
+									if (tempUni==0){tempUni=5;} else { tempUni--; }
+								}
+								else { if (tempUni==0){tempUni=9;} else { tempUni--; }}
+							}
+							else
+							{
+								if (tempUni==0){tempUni=9;} else { tempUni--; }
+							}
+
+							break;
+						}
+					case DEZENA://dezena
+						{
+
+
+							if (tempCen==2)
+							{
+								if (tempDez==0){tempDez=5;
+									if (tempUni>5){tempUni=5;}
+								} else { tempDez--; }
+							}
+							else
+							{
+								if (tempDez==0){tempDez=9;} else { tempDez--; }
+							}
+
+							break;
+						}
+					case CENTENA://centena
+						{
+
+							if (tempCen==0)
+							{
+								tempCen=2;
+								if (tempDez>5) {tempDez=5;}
+								if (tempDez==5)
+								{
+									if (tempUni>5) {tempUni=5;}
+								}
+							}
+							else { tempCen--; }
+
+
+							break;
+						}
+				}
+				break;
+			}
+		case GOTO_ALG_PROXIMO_BYTE:
+			{
+				//muda para o algarismo proximo, current+1
+				currentAlgarismo++; if (currentAlgarismo>UNIDADE) {currentAlgarismo=CENTENA;}
+				break;
+			}
+		case GOTO_ALG_ANTERIOR_BYTE:
+			{
+				//muda para o algarismo anterior, current-1
+				currentAlgarismo--; if (currentAlgarismo<CENTENA) {currentAlgarismo=UNIDADE;}
+				break;
+			}
+
+		case NONE:
+			{
+				break;
+			}
+
+		case DECREMENTA_BAUD_RATE:
+			{
+				BaudRate_temp=BaudRate_temp-1;
+				if (BaudRate_temp==0xFF){BaudRate_temp=BR115200;}
+				break;
+			}
+		case INCREMENTA_BAUD_RATE:
+			{
+				BaudRate_temp=BaudRate_temp+1;
+				if (BaudRate_temp>BR115200){BaudRate_temp=BR4800;}
+				break;
+			}
+		case DECREMENTA_PARIDADE_STOPS:
+			{
+				ParidadeStops_temp=ParidadeStops_temp-1;
+				if (ParidadeStops_temp==0xFF){ParidadeStops_temp=ps8E1;}
+				break;
+			}
+		case INCREMENTA_PARIDADE_STOPS:
+			{
+				ParidadeStops_temp=ParidadeStops_temp+1;
+				if (ParidadeStops_temp>ps8E1){ParidadeStops_temp=ps8N2;}
+				break;
+			}
+
+		case ABANDONA_PROG_RESET_CONSUMO:
+			{
+				zeraConsumos='n';
+				telaAtual=TELA_PROG_RESET_CONSUMO;
+				break;
+			}
+
+		case ABANDONA_PROG_ESCRAVO_MODBUS :
+			{
+				telaAtual=TELA_PROG_ESCRAVO_MODBUS;
+				break;
+			}
+
+		case ABANDONA_PROG_BAUD_RATE:
+			{
+				BaudRate_temp=BaudRatex;
+				telaAtual=TELA_PROG_BAUD_RATE;
+				break;
+			}
+		case ABANDONA_PROG_NRO_PORTA:
+			{
+				NroPorta_temp=NroPorta;
+				telaAtual=TELA_PROG_NRO_PORTA;
+				break;
+			}
+		case GRAVA_PROG_NRO_PORTA :
+			{
+				NroPorta_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_NRO_PORTA;
+				break;
+			}
+		case GRAVA_PROG_BAUD_RATE :
+			{
+				telaAtual=TELA_PROG_BAUD_RATE;
+				break;
+			}
+
+		case GRAVA_PROG_ESCRAVO_MODBUS :
+			{
+				MeuEnderecoMODBUS_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_ESCRAVO_MODBUS;
+				break;
+			}
+
+		case GRAVA_PROG_RESET_CONSUMO:
+			{
+				telaAtual=TELA_PROG_RESET_CONSUMO;
+				break;
+			}
+
+		case ABANDONA_PROG_REL_TP_PRI:
+			{
+				telaAtual=TELA_PROG_REL_TP_PRI;
+				break;
+			}
+		case ABANDONA_PROG_REL_TP_SEC:
+			{
+				telaAtual=TELA_PROG_REL_TP_SEC;
+				break;
+			}
+		case ABANDONA_PROG_REL_TP_FAT:
+			{
+				telaAtual=TELA_PROG_REL_TP_FAT;
+				break;
+			}
+
+		case ABANDONA_PROG_REL_TC_PRI:
+			{
+				telaAtual=TELA_PROG_REL_TC_PRI;
+				break;
+			}
+		case ABANDONA_PROG_REL_TC_SEC:
+			{
+				telaAtual=TELA_PROG_REL_TC_SEC;
+				break;
+			}
+		case ABANDONA_PROG_REL_TC_FAT:
+			{
+				telaAtual=TELA_PROG_REL_TC_FAT;
+				break;
+			}
+		case ABANDONA_PROG_PARIDADE_STOPS:
+			{
+				telaAtual=TELA_PROG_PARIDADE_STOPS;
+				ParidadeStops_temp=ParidadeStops;
+				break;
+			}
+		case ABANDONA_PROG_IP_OCTETO1:
+			{
+				telaAtual=TELA_PROG_IP_OCTETO1;
+				IPOcteto1_temp=IPOcteto1;
+				break;
+			}
+		case ABANDONA_PROG_IP_OCTETO2:
+			{
+				telaAtual=TELA_PROG_IP_OCTETO2;
+				IPOcteto2_temp=IPOcteto2;
+				break;
+			}
+		case ABANDONA_PROG_IP_OCTETO3:
+			{
+				telaAtual=TELA_PROG_IP_OCTETO3;
+				IPOcteto3_temp=IPOcteto3;
+				break;
+			}
+		case ABANDONA_PROG_IP_OCTETO4:
+			{
+				telaAtual=TELA_PROG_IP_OCTETO4;
+				IPOcteto4_temp=IPOcteto4;
+				break;
+			}
+		case ABANDONA_PROG_GW_OCTETO1:
+			{
+				telaAtual=TELA_PROG_GW_OCTETO1;
+				GWOcteto1_temp=GWOcteto1;
+				break;
+			}
+		case ABANDONA_PROG_GW_OCTETO2:
+			{
+				telaAtual=TELA_PROG_GW_OCTETO2;
+				GWOcteto2_temp=GWOcteto2;
+				break;
+			}
+		case ABANDONA_PROG_GW_OCTETO3:
+			{
+				telaAtual=TELA_PROG_GW_OCTETO3;
+				GWOcteto3_temp=GWOcteto3;
+				break;
+			}
+		case ABANDONA_PROG_GW_OCTETO4:
+			{
+				telaAtual=TELA_PROG_GW_OCTETO4;
+				GWOcteto4_temp=GWOcteto4;
+				break;
+			}
+		case ABANDONA_PROG_MK_OCTETO1:
+			{
+				telaAtual=TELA_PROG_MK_OCTETO1;
+				MKOcteto1_temp=MKOcteto1;
+				break;
+			}
+		case ABANDONA_PROG_MK_OCTETO2:
+			{
+				telaAtual=TELA_PROG_MK_OCTETO2;
+				MKOcteto2_temp=MKOcteto2;
+				break;
+			}
+		case ABANDONA_PROG_MK_OCTETO3:
+			{
+				telaAtual=TELA_PROG_MK_OCTETO3;
+				MKOcteto3_temp=MKOcteto3;
+				break;
+			}
+		case ABANDONA_PROG_MK_OCTETO4:
+			{
+				telaAtual=TELA_PROG_MK_OCTETO4;
+				MKOcteto4_temp=MKOcteto4;
+				break;
+			}
+
+		case GRAVA_PROG_IP_OCTETO4:
+			{
+				IPOcteto4_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO4;
+				break;
+			}
+
+		case GRAVA_PROG_IP_OCTETO3:
+			{
+				IPOcteto3_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO3;
+				break;
+			}
+
+		case GRAVA_PROG_IP_OCTETO2:
+			{
+				IPOcteto2_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO2;
+				break;
+			}
+
+		case GRAVA_PROG_IP_OCTETO1:
+			{
+				IPOcteto1_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_IP_OCTETO1;
+				break;
+			}
+		case GRAVA_PROG_MK_OCTETO4:
+			{
+				MKOcteto4_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO4;
+				break;
+			}
+
+		case GRAVA_PROG_MK_OCTETO3:
+			{
+				MKOcteto3_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO3;
+				break;
+			}
+
+		case GRAVA_PROG_MK_OCTETO2:
+			{
+				MKOcteto2_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO2;
+				break;
+			}
+
+		case GRAVA_PROG_MK_OCTETO1:
+			{
+				MKOcteto1_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_MK_OCTETO1;
+				break;
+			}
+		case GRAVA_PROG_GW_OCTETO4:
+			{
+				GWOcteto4_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO4;
+				break;
+			}
+		case GRAVA_PROG_GW_OCTETO3:
+			{
+				GWOcteto3_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO3;
+				break;
+			}
+
+		case GRAVA_PROG_GW_OCTETO2:
+			{
+				GWOcteto2_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO2;
+				break;
+			}
+
+		case GRAVA_PROG_GW_OCTETO1:
+			{
+				GWOcteto1_temp=(BYTE)BCDtoInt(0,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_GW_OCTETO1;
+				break;
+			}
+
+		case GRAVA_PROG_PARIDADE_STOPS:
+			{
+				telaAtual=TELA_PROG_PARIDADE_STOPS;
+				break;
+			}
+		case GRAVA_PROG_REL_TP_PRI:
+			{
+				relacaoTPpri_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_REL_TP_PRI;
+				break;
+			}
+		case GRAVA_PROG_REL_TP_SEC:
+			{
+				relacaoTPsec_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_REL_TP_SEC;
+				break;
+			}
+		case GRAVA_PROG_REL_TP_FAT:
+			{
+				relacaoTPfat_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_REL_TP_FAT;
+				break;
+			}
+		case GRAVA_PROG_REL_TC_PRI:
+			{
+				relacaoTCpri_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_REL_TC_PRI;
+				break;
+			}
+		case GRAVA_PROG_REL_TC_SEC:
+			{
+				relacaoTCsec_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_REL_TC_SEC;
+				break;
+			}
+		case GRAVA_PROG_REL_TC_FAT:
+			{
+				relacaoTCfat_temp=BCDtoInt(tempMil,tempCen,tempDez,tempUni);
+				telaAtual=TELA_PROG_REL_TC_FAT;
+				break;
+			}
+		default:
+			{
+				telaAtual=funcao&0x7F;	 //util no modo de programa��o
+				break;
+			}
+
+	}/* final do switch */
+
+	ultimaFuncaoChamada=funcao;
+}
+
+/*
+   Gerencia a exibicao das telas do equipamento
+   Qdo se 'entra' em uma nova tela,
+   ajustam-se as 'condicoes iniciais'
+ */
+void gerenciaTelas(void){
+	char str[12];
+	char *pstr;
+	int FlagKilo,FlagMenos;
+	//RTCTime LocalTime;
+	//int *p;
+
+	if(ultimaTelaExibida != telaAtual) inicializaTela(telaAtual);
+	/*
+	   Efetivamente atualiza condicoes din�micas da
+	   tela (valores como medicoes, entradas
+	   de usuario, etc. )
+	 */
+
+	switch(telaAtual)
+	{
+		//telas de exibi��o:
+		case TELA_APRESENTACAO:
+			{
+				FloatToStr(Versao,&str[1],&FlagKilo,&FlagMenos);
+				str[0]=' ';
+				pstr=&str[0];
+				WriteString(dpyLINHA3,pstr);
+				break;
+			}
+
+		case TELA_TENSOES_ABC:
+			{
+				//p=SETOR_PARAMETRIZACAO_INICIO;
+				setLED(LED_Volt);
+				/*
+				   UrmsA=(float)RTCGetTime().RTC_Year;
+				   UrmsB=(float)RTCGetTime().RTC_Min;
+				   UrmsC=(float)RTCGetTime().RTC_Hour;	*/
+
+				TelaValoresTrifasicos(UrmsA,UrmsB,UrmsC);	break;
+				//	TelaValoresTrifasicos(UrmsA,UrmsB,(float)(*p));	break;
+
+				//		TelaValoresTrifasicos(UrmsA,UrmsAfund,DhtUA);	break;
+
+			}
+
+		case TELA_CORRENTES_ABC:
+			{
+				setLED(LED_Amp);
+				TelaValoresTrifasicos(IrmsA,IrmsB,IrmsC);	break;
+				//		TelaValoresTrifasicos(IrmsB,IrmsBfund,DhtIB);	break;
+				//			TelaValoresTrifasicos(UrmsAfund,UrmsBfund,UrmsCfund);	break;
+			}
+
+		case TELA_FATORES_DE_POT_ABC:
+			{
+				setLED(LED_Fp);
+				TelaValoresTrifasicos(FatPotA,FatPotB,FatPotC);	break;
+			}
+
+		case TELA_POT_ATIVA_ABC:
+			{
+				setLED(LED_Watt);
+				TelaValoresTrifasicos(PotAtivA,PotAtivB,PotAtivC);	break;
+			}
+
+		case TELA_POT_REATIVA_ABC:
+			{
+				setLED(LED_Var);
+				TelaValoresTrifasicos(PotReatA,PotReatB,PotReatC);	break;
+			}
+
+		case TELA_POT_APARENTE_ABC:
+			{
+				setLED(LED_Va);
+				TelaValoresTrifasicos(PotAparA,PotAparB,PotAparC);	break;
+			}
+
+		case TELA_DHTU_ABC:
+			{
+				setLED(LED_DhtU);
+				TelaValoresTrifasicos(DhtUA,DhtUB,DhtUC);	break;
+			}
+
+		case TELA_DHTI_ABC:
+			{
+				setLED(LED_DhtI);
+				TelaValoresTrifasicos(DhtIA,DhtIB,DhtIC);	break;
+			}
+
+		case TELA_FREQ:
+			{
+				setLED(LED_Freq);
+				setLED(LED_FaseA);
+				WriteString(dpyLINHA2,"        ");
+				WriteFloatString(FreqA,dpyLINHA1);
+				break;
+			}
+		case TELA_FP_KW_KVAR:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Watt);
+				setLED(LED_Var);
+				setLED(LED_Fp);
+				WriteFloatString(FatPotT,dpyLINHA1);
+				WriteFloatString(PotAtivT,dpyLINHA2);
+				WriteFloatString(PotReatT,dpyLINHA3);
+
+				break;
+			}
+
+		case TELA_U_I_FP_A:
+			{
+				setLED(LED_FaseA);
+				setLED(LED_Volt);
+				setLED(LED_Amp);
+				setLED(LED_Fp);
+				WriteFloatString(UrmsA,dpyLINHA1);
+				WriteFloatString(IrmsA,dpyLINHA2);
+				WriteFloatString(FatPotA,dpyLINHA3);
+				break;
+			}
+		case TELA_U_I_FP_B:
+			{
+				setLED(LED_FaseB);
+				setLED(LED_Volt);
+				setLED(LED_Amp);
+				setLED(LED_Fp);
+				WriteFloatString(UrmsB,dpyLINHA1);
+				WriteFloatString(IrmsB,dpyLINHA2);
+				WriteFloatString(FatPotB,dpyLINHA3);
+				break;
+			}
+		case TELA_U_I_FP_C:
+			{
+				setLED(LED_FaseC);
+				setLED(LED_Volt);
+				setLED(LED_Amp);
+				setLED(LED_Fp);
+				WriteFloatString(UrmsC,dpyLINHA1);
+				WriteFloatString(IrmsC,dpyLINHA2);
+				WriteFloatString(FatPotC,dpyLINHA3);
+				break;
+			}
+		case TELA_W_VAR_VA_A:
+			{
+				setLED(LED_FaseA);
+				setLED(LED_Watt);
+				setLED(LED_Var);
+				setLED(LED_Va);
+				WriteFloatString(PotAtivA,dpyLINHA1);
+				WriteFloatString(PotReatA,dpyLINHA2);
+				WriteFloatString(PotAparA,dpyLINHA3);
+				break;
+			}
+		case TELA_W_VAR_VA_B:
+			{
+				setLED(LED_FaseB);
+				setLED(LED_Watt);
+				setLED(LED_Var);
+				setLED(LED_Va);
+				WriteFloatString(PotAtivB,dpyLINHA1);
+				WriteFloatString(PotReatB,dpyLINHA2);
+				WriteFloatString(PotAparB,dpyLINHA3);
+				break;
+			}
+		case TELA_W_VAR_VA_C:
+			{
+				setLED(LED_FaseC);
+				setLED(LED_Watt);
+				setLED(LED_Var);
+				setLED(LED_Va);
+				WriteFloatString(PotAtivC,dpyLINHA1);
+				WriteFloatString(PotReatC,dpyLINHA2);
+				WriteFloatString(PotAparC,dpyLINHA3);
+				break;
+			}
+		case TELA_CONSUMO_TOTAL:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kwh);
+				FloatToStrForEnergy(ConsumoT*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3,"  At"); //consumo ativo
+				break;
+			}
+		case TELA_CONSUMO_PONTA:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kwh);
+				FloatToStrForEnergy(ConsumoPontaMesPassado*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3,"At P"); //consumo ativo
+				break;
+			}
+		case TELA_CONSUMO_FORAPONTA:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kwh);
+				FloatToStrForEnergy(ConsumoForaPontaMesPassado*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3,"AtFP"); //consumo ativo
+				break;
+			}
+		case TELA_CONSUMO_RESERVADO:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kwh);
+				FloatToStrForEnergy(ConsumoReservMesPassado*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3,"AtrE"); //consumo ativo
+				break;
+			}
+		case TELA_DEMANDA_PONTA:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Watt);
+				WriteString(dpyLINHA2,"        ");
+				WriteFloatString(Lista7DeMaxPotAtivPontaMesPassado[0],dpyLINHA1);
+				WriteString(dpyLINHA3,"dE P"); //consumo ativo
+				break;
+			}
+		case TELA_DEMANDA_FORAPONTA:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Watt);
+				WriteString(dpyLINHA2,"        ");
+				WriteFloatString(Lista8DeMaxPotAtivForaPontaMesPassado[0],dpyLINHA1);
+				WriteString(dpyLINHA3,"dEFP"); //consumo ativo
+				break;
+			}
+		case TELA_DEMANDA_RESERVADO:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Watt);
+				WriteString(dpyLINHA2,"        ");
+				WriteFloatString(Lista9DeMaxPotAtivReservMesPassado[0],dpyLINHA1);
+				WriteString(dpyLINHA3,"dErE"); //consumo ativo
+				break;
+			}
+		case TELA_GERADA_TOTAL:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kwh);
+				FloatToStrForEnergy(EnergGerT*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3," GEr");
+				break;
+			}
+
+		case TELA_ENERGIA_IND_TOTAL:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kvarh);
+				FloatToStrForEnergy(EnergIndT*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3," Ind");
+
+				break;
+			}
+		case TELA_ENERGIA_CAP_TOTAL:
+			{
+				setLED(LED_Trif);
+				setLED(LED_Kvarh);
+				FloatToStrForEnergy(EnergCapT*0.001,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3," CAP");
+
+				break;
+			}
+		case TELA_NSERIE:
+			{
+				clrALL_LEDs();
+				WriteString(dpyLINHA1,"n.S.  ");
+				pstr=(char *)&nserie_str[0];
+				WriteString(dpyLINHA2,pstr);
+				break;
+			}
+
+		case TELA_U_AB:
+			{
+				setLED(LED_FaseA);
+				setLED(LED_FaseB);
+				setLED(LED_Volt);
+				WriteFloatString(UrmsAB,dpyLINHA1);
+				WriteString(dpyLINHA2,"     ");
+				WriteString(dpyLINHA3,"     ");
+				break;
+			}
+		case TELA_U_BC:
+			{
+				setLED(LED_FaseB);
+				setLED(LED_FaseC);
+				setLED(LED_Volt);
+				WriteFloatString(UrmsBC,dpyLINHA1);
+				WriteString(dpyLINHA2,"     ");
+				WriteString(dpyLINHA3,"     ");
+				break;
+			}
+
+		case TELA_U_CA:
+			{
+				setLED(LED_FaseA);
+				setLED(LED_FaseC);
+				setLED(LED_Volt);
+				WriteFloatString(UrmsCA,dpyLINHA1);
+				WriteString(dpyLINHA2,"     ");
+				WriteString(dpyLINHA3,"     ");
+				break;
+			}
+
+
+		case TELA_TESTE:
+			{
+				setAll_LEDs();
+				WriteString(dpyLINHA1,"xxxxxxxxxxxx");
+				break;
+			}
+#ifdef MODELO_D
+		case TELA_TESTE1:
+			{
+				FloatToStrForPulso(pulso1,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3,"Ed 1"); //consumo ativo
+				break;
+			}
+//#ifndef MODELO_DURACAO_PULSO
+		case TELA_TESTE2:
+			{
+				FloatToStrForPulso(pulso2,&str[0]);
+				pstr=&str[0];
+				WriteString(dpyLINHA1,pstr);
+				WriteString(dpyLINHA3,"Ed 2"); //consumo ativo
+				break;
+			}
+//#endif
+#endif
+
+
+
+			//telas de programa��o:
+
+		case TELA_PROG_REL_TP_PRI_MOD:
+		case TELA_PROG_REL_TP_SEC_MOD:
+		case TELA_PROG_REL_TP_FAT_MOD:
+		case TELA_PROG_REL_TC_PRI_MOD:
+		case TELA_PROG_REL_TC_SEC_MOD:
+		case TELA_PROG_REL_TC_FAT_MOD:
+		case TELA_PROG_ESCRAVO_MODBUS_MOD:
+		case TELA_PROG_IP_OCTETO1_MOD:
+		case TELA_PROG_IP_OCTETO2_MOD:
+		case TELA_PROG_IP_OCTETO3_MOD:
+		case TELA_PROG_IP_OCTETO4_MOD:
+		case TELA_PROG_MK_OCTETO1_MOD:
+		case TELA_PROG_MK_OCTETO2_MOD:
+		case TELA_PROG_MK_OCTETO3_MOD:
+		case TELA_PROG_MK_OCTETO4_MOD:
+		case TELA_PROG_GW_OCTETO1_MOD:
+		case TELA_PROG_GW_OCTETO2_MOD:
+		case TELA_PROG_GW_OCTETO3_MOD:
+		case TELA_PROG_GW_OCTETO4_MOD:
+		case TELA_PROG_NRO_PORTA_MOD:
+			{
+				setDpyPiscante(currentAlgarismo,currentAlgarismo);
+				SkewBanner();
+				WriteIntString(BCDtoInt(tempMil,tempCen,tempDez,tempUni),dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_REL_TP_PRI:
+			{
+				SkewBanner();
+				WriteIntString(relacaoTPpri_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_REL_TP_SEC:
+			{
+				SkewBanner();
+				WriteIntString( relacaoTPsec_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_REL_TP_FAT:
+			{
+				SkewBanner();
+				WriteIntString(relacaoTPfat_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_REL_TC_PRI:
+			{
+				SkewBanner();
+				WriteIntString(relacaoTCpri_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_REL_TC_SEC:
+			{
+				SkewBanner();
+				WriteIntString(relacaoTCsec_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_REL_TC_FAT:
+			{
+				SkewBanner();
+				WriteIntString(relacaoTCfat_temp,dpyLINHA3);
+				break;
+			}
+
+		case TELA_PROG_RESET_CONSUMO_MOD:
+			setDpyPiscante(8,11);
+		case TELA_PROG_RESET_CONSUMO:
+			{
+				SkewBanner();
+				if (zeraConsumos=='n'){
+					WriteString(dpyLINHA3," nAO");}
+				if (zeraConsumos=='S'){
+					WriteString(dpyLINHA3,"SI[]");}
+				break;
+			}
+		case TELA_PROG_ESCRAVO_MODBUS:
+			{
+				SkewBanner();
+				WriteIntString(MeuEnderecoMODBUS_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_BAUD_RATE_MOD:
+			setDpyPiscante(8,11);
+		case TELA_PROG_BAUD_RATE:
+			{
+				SkewBanner();
+
+				switch(BaudRate_temp)
+				{
+					case BR4800:
+						{
+							WriteString(dpyLINHA3,"  4.8");
+							break;
+						}
+					case BR9600:
+						{
+							WriteString(dpyLINHA3,"  9.6");
+							break;
+						}
+					case BR14400:
+						{
+							WriteString(dpyLINHA3," 14.4");
+							break;
+						}
+					case BR19200:
+						{
+							WriteString(dpyLINHA3," 19.2");
+							break;
+						}
+					case BR38400:
+						{
+							WriteString(dpyLINHA3," 38.4");
+							break;
+						}
+					case BR56000:
+						{
+							WriteString(dpyLINHA3," 56.0");
+							break;
+						}
+					case BR57600:
+						{
+							WriteString(dpyLINHA3," 57.6");
+							break;
+						}
+					case BR115200:
+						{
+							WriteString(dpyLINHA3,"115.2");
+							break;
+						}
+
+				}
+				break;
+			}
+		case TELA_PROG_PARIDADE_STOPS_MOD:
+			setDpyPiscante(8,11);
+		case TELA_PROG_PARIDADE_STOPS:
+			{
+				SkewBanner();
+				switch(ParidadeStops_temp)
+				{
+					case ps8N2:
+						{
+							WriteString(dpyLINHA3," 8n2");
+							break;
+						}
+					case ps8O1:
+						{
+							WriteString(dpyLINHA3," 8o1");
+							break;
+						}
+					case ps8E1:
+						{
+							WriteString(dpyLINHA3," 8E1");
+							break;
+						}
+				}
+
+				break;
+			}
+		case TELA_PROG_IP_OCTETO1:
+			{
+				SkewBanner();
+				WriteIntString( IPOcteto1_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_IP_OCTETO2:
+			{
+				SkewBanner();
+				WriteIntString( IPOcteto2_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_IP_OCTETO3:
+			{
+				SkewBanner();
+				WriteIntString( IPOcteto3_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_IP_OCTETO4:
+			{
+				SkewBanner();
+				WriteIntString( IPOcteto4_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_MK_OCTETO1:
+			{
+				SkewBanner();
+				WriteIntString( MKOcteto1_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_MK_OCTETO2:
+			{
+				SkewBanner();
+				WriteIntString( MKOcteto2_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_MK_OCTETO3:
+			{
+				SkewBanner();
+				WriteIntString( MKOcteto3_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_MK_OCTETO4:
+			{
+				SkewBanner();
+				WriteIntString( MKOcteto4_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_GW_OCTETO1:
+			{
+				SkewBanner();
+				WriteIntString( GWOcteto1_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_GW_OCTETO2:
+			{
+				SkewBanner();
+				WriteIntString( GWOcteto2_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_GW_OCTETO3:
+			{
+				SkewBanner();
+				WriteIntString( GWOcteto3_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_GW_OCTETO4:
+			{
+				SkewBanner();
+				WriteIntString( GWOcteto4_temp,dpyLINHA3);
+				break;
+			}
+		case TELA_PROG_NRO_PORTA:
+			{
+				SkewBanner();
+				WriteIntString(NroPorta_temp,dpyLINHA3);
+				break;
+			}
+
+		case TELA_PROG_GRAVAR_SIM_NAO_MOD:
+			//case TELA_PROG_GRAVAR_SIM_NAO:
+			{
+				//	SkewBanner();
+				setDpyPiscante(8,11);
+				if (SairGravando=='n'){
+					WriteString(dpyLINHA3," nAO");}
+				if (SairGravando=='S'){
+					WriteString(dpyLINHA3,"SI[]");}
+				break;
+			}
+
+	}/* switch telaAtual */
+}
+
+
+
+
+/*
+   Ao se entrar em uma nova tela, eh preciso
+   inicializar suas variaveis de controle (condicoes iniciais),
+   como posicao do cursor (se existe um),
+   desenhar o 'fundo', funcoes de teclado, etc.
+ */
+void inicializaTela(int tela)
+{
+
+	inicializa_funcao_teclas(tela);
+	clrALL_LEDs();
+	FlagHabBanner=OFF;
+
+	if (tela>=INICIO_TELAS_DE_PROGRAMACAO) //Telas de Programa��o
+	{
+		//escreve PROG no fundo da tela...
+		WriteString(dpyLINHA1,"ProG"); //, esta tela podia ser um banner tamb�m no futuro.
+		//	  	  WriteString(dpyLINHA3,"    ");
+		if (tela==INICIO_TELAS_DE_PROGRAMACAO) /* tela ANTERIOR */
+		{
+#if (MODELO==COM_ETHERNET_COM_RS485)
+			tela1=FIM_TELAS_DE_PROGRAMACAO;
+#endif
+
+#if (MODELO==COM_ETHERNET_SEM_RS485)
+			tela1=FIM_TELAS_DE_PROGRAMACAO;
+#endif
+
+#if (MODELO==SEM_ETHERNET_COM_RS485)
+			tela1=TELA_PROG_PARIDADE_STOPS;
+#endif
+
+#if (MODELO==SEM_ETHERNET_SEM_RS485)
+			tela1= TELA_PROG_RESET_CONSUMO;
+#endif
+
+		}
+		else
+		{
+			tela1=tela-1;
+#if (MODELO==COM_ETHERNET_COM_RS485)
+
+#endif
+
+#if (MODELO==COM_ETHERNET_SEM_RS485)
+			if (tela==TELA_PROG_IP_OCTETO1)
+			{
+				tela1=TELA_PROG_RESET_CONSUMO;
+			}
+#endif
+#if (MODELO==SEM_ETHERNET_COM_RS485)
+			if (tela==TELA_PROG_IP_OCTETO1)
+			{
+				tela1=TELA_PROG_PARIDADE_STOPS;
+			}
+#endif
+
+#if (MODELO==SEM_ETHERNET_SEM_RS485)
+
+			if (tela==TELA_PROG_ESCRAVO_MODBUS)
+			{
+				tela1=TELA_PROG_RESET_CONSUMO;
+			}
+
+#endif
+
+		}
+
+		if (tela==FIM_TELAS_DE_PROGRAMACAO)  /* tela PROXIMA */
+		{
+			tela2=INICIO_TELAS_DE_PROGRAMACAO;
+		}
+		else
+		{
+			tela2=tela+1;
+
+#if (MODELO==COM_ETHERNET_SEM_RS485)
+			if (tela2==TELA_PROG_ESCRAVO_MODBUS)
+			{tela2=TELA_PROG_IP_OCTETO1;}
+			// if (tela2==TELA_PROG_MK_OCTETO1)
+			// {tela2=INICIO_TELAS_DE_PROGRAMACAO;}
+#endif
+
+#if (MODELO==SEM_ETHERNET_COM_RS485)
+
+			if (tela2==TELA_PROG_IP_OCTETO1)
+			{
+				tela2=INICIO_TELAS_DE_PROGRAMACAO;
+			}
+#endif
+#if (MODELO==SEM_ETHERNET_SEM_RS485)
+
+			if (tela2==TELA_PROG_ESCRAVO_MODBUS)
+			{
+				tela2=INICIO_TELAS_DE_PROGRAMACAO;
+			}
+#endif
+
+		}
+
+		switch(tela)
+		{
+
+			case TELA_PROG_REL_TP_PRI:
+				{
+					WriteBanner(dpyLINHA2,"    rELACAO tP PrI[]ArIO");
+					break;
+				}
+			case TELA_PROG_REL_TP_SEC:
+				{
+					WriteBanner(dpyLINHA2,"    rELACAO tP SECUndArIO");
+					break;
+				}
+			case TELA_PROG_REL_TP_FAT:
+				{
+					WriteBanner(dpyLINHA2,"    FAtOr []ULtIPLICACAO tP");
+					break;
+				}
+			case TELA_PROG_REL_TC_PRI:
+				{
+					WriteBanner(dpyLINHA2,"    rELACAO tC PrI[]ArIO");
+					break;
+				}
+			case TELA_PROG_REL_TC_SEC:
+				{
+					WriteBanner(dpyLINHA2,"    rELACAO tC SECUndArIO");
+					break;
+				}
+			case TELA_PROG_REL_TC_FAT:
+				{
+					WriteBanner(dpyLINHA2,"    FAtOr []ULtIPLICACAO tC");
+					break;
+				}
+			case TELA_PROG_RESET_CONSUMO:
+				{
+					WriteBanner(dpyLINHA2,"    rESEt COnSU[]OS");
+					break;
+				}
+
+			case TELA_PROG_ESCRAVO_MODBUS:
+				{
+					WriteBanner(dpyLINHA2,"    nU[]ErO nA rEdE []OdbUS");
+					break;
+				}
+			case TELA_PROG_BAUD_RATE:
+				{
+					WriteBanner(dpyLINHA2,"    bAUd rAtE");
+					break;
+				}
+			case TELA_PROG_PARIDADE_STOPS:
+				{
+					WriteBanner(dpyLINHA2,"    PArIdAdE-StOP bItS");
+					break;
+				}
+			case TELA_PROG_IP_OCTETO1:
+				{
+					WriteBanner(dpyLINHA2,"    1@-OCtEtO-EndErECO IP");
+					break;
+				}
+			case TELA_PROG_IP_OCTETO2:
+				{
+					WriteBanner(dpyLINHA2,"    2@-OCtEtO-EndErECO IP");
+					break;
+				}
+			case TELA_PROG_IP_OCTETO3:
+				{
+					WriteBanner(dpyLINHA2,"    3@-OCtEtO-EndErECO IP");
+					break;
+				}
+			case TELA_PROG_IP_OCTETO4:
+				{
+					WriteBanner(dpyLINHA2,"    4@-OCtEtO-EndErECO IP");
+					break;
+				}
+			case TELA_PROG_MK_OCTETO1:
+				{
+					WriteBanner(dpyLINHA2,"    1@-OCtEtO-[]ASCArA SUbrEdE");
+					break;
+				}
+			case TELA_PROG_MK_OCTETO2:
+				{
+					WriteBanner(dpyLINHA2,"    2@-OCtEtO-[]ASCArA SUbrEdE");
+					break;
+				}
+			case TELA_PROG_MK_OCTETO3:
+				{
+					WriteBanner(dpyLINHA2,"    3@-OCtEtO-[]ASCArA SUbrEdE");
+					break;
+				}
+			case TELA_PROG_MK_OCTETO4:
+				{
+					WriteBanner(dpyLINHA2,"    4@-OCtEtO-[]ASCArA SUbrEdE");
+					break;
+				}
+			case TELA_PROG_GW_OCTETO1:
+				{
+					WriteBanner(dpyLINHA2,"    1@-OCtEtO-GAtE)(AY");
+					break;
+				}
+			case TELA_PROG_GW_OCTETO2:
+				{
+					WriteBanner(dpyLINHA2,"    2@-OCtEtO-GAtE)(AY");
+					break;
+				}
+			case TELA_PROG_GW_OCTETO3:
+				{
+					WriteBanner(dpyLINHA2,"    3@-OCtEtO-GAtE)(AY");
+					break;
+				}
+			case TELA_PROG_GW_OCTETO4:
+				{
+					WriteBanner(dpyLINHA2,"    4@-OCtEtO-GAtE)(AY");
+					break;
+				}
+			case TELA_PROG_NRO_PORTA:
+				{
+					WriteBanner(dpyLINHA2,"    PortA nr@");
+					break;
+				}
+
+			case TELA_PROG_GRAVAR_SIM_NAO_MOD:
+				{
+					WriteString(dpyLINHA2,"ConFIr[]A ?");
+					//	WriteBanner(dpyLINHA2,"    ConFIr[]A ?");
+					break;
+				}
+
+
+		}
+	}
+
+	else									//Telas de Exibi��o
+	{
+		if (tela==INICIO_TELAS_DE_EXIBICAO) /* tela ANTERIOR */
+		{
+			tela1=FIM_TELAS_DE_EXIBICAO;
+		}
+		else
+		{
+			tela1=tela-1;
+		}
+		if (tela==FIM_TELAS_DE_EXIBICAO)  /* PROXIMA */
+		{
+			tela2=INICIO_TELAS_DE_EXIBICAO;
+		}
+		else
+		{
+			tela2=tela+1;
+		}
+
+		switch(tela)
+		{
+			case TELA_APRESENTACAO:
+				{
+#ifndef MD_EM_TESTE
+#ifdef MD4000
+					WriteString(dpyLINHA1,"[]d 4000"); //escreve MD4000 no fundo da tela...
+#endif
+#ifdef MD4040
+					WriteString(dpyLINHA1,"[]d 4040"); //escreve MD4040 no fundo da tela...
+#endif
+#endif
+#ifdef MD_EM_TESTE
+					WriteString(dpyLINHA1,"E[] tESt"); //escreve 'Em teste' no fundo da tela...
+#endif
+
+					break;
+				}
+		}
+	}
+
+	ultimaTelaExibida=tela;
+}
+
+
+
+
+void proximaTela(int tela){
+	telaAnterior=telaAtual;
+	telaAtual=tela;
+}
+
+/*
+   Recebe como parametro o endereco do array de funcoes
+   a ser copiado para funcaoTeclas
+ */
+void inicializa_funcao_teclas(int tela)
+{
+	funcaoTeclas[TC_NULL]	= FuncoesDasTeclas[tela].null;
+	funcaoTeclas[TC_UP]		= FuncoesDasTeclas[tela].up;
+	funcaoTeclas[TC_DOWN]	= FuncoesDasTeclas[tela].down;
+	funcaoTeclas[TC_LEFT]	= FuncoesDasTeclas[tela].left;
+	funcaoTeclas[TC_RIGTH]	= FuncoesDasTeclas[tela].rigth;
+	funcaoTeclas[TC_ESC]	= FuncoesDasTeclas[tela].esc;
+	funcaoTeclas[TC_PRG]	= FuncoesDasTeclas[tela].prog;
+}
+
+
+
+short newLeTeclado(short NTelaTR){
+#include "main.h"
+static int	last_tela=0;
+static int	debouncing=0;
+	  if (HAL_GPIO_ReadPin(TCL1_GPIO_Port, TCL1_Pin)==0)
+	 {
+		  NTelaTR ++;
+
+	 }
+	  if (HAL_GPIO_ReadPin(TCL2_GPIO_Port, TCL2_Pin)==0)
+	 {
+		  NTelaTR--;
+
+	 }
+
+#if EQUIP_LINHA50 == MD_EQUIP
+
+		if (NTelaTR > 9)
+		{
+			NTelaTR = 0;
+		}
+		if (NTelaTR < 0)
+		{
+			NTelaTR = 9;
+		}
+#else
+		if (NTelaTR > 3)
+		{
+			NTelaTR = 0;
+		}
+		if (NTelaTR < 0)
+		{
+			NTelaTR = 3;
+		}
+#endif
+
+if (last_tela!=NTelaTR) {
+	last_tela=NTelaTR;
+
+
+}
+
+return NTelaTR;
+}
+
+/*
+   Le o teclado
+ */
+
+//    Qdo o usuario pressiona uma tecla, por exemplo 01
+//
+//    teclaAtual      =       01
+//    ultimaTeclaExecutada (=00)
+//
+//    Como teclaAtual != ultimaTeclaExecutada, executa a funcao
+//
+//    No proximo laco, se o usuario nao 'tirou' o dedo do teclado,
+//    teclaAtual      =       01
+//    ultimaTeclaExecutada =  (01)
+//
+//    Nenhuma acao eh executada.
+//
+//    Qdo o usuario soltar o teclado, teclaAtual sera igual a zero,
+//    e o software chamara executaFuncao, executando funcao ZERO,
+//    ou seja, este algoritmo naturalmente previne pressao repetitiva
+
+
+void leTeclado(void)	  //le apenas a tecla P0.15
+{
+	DWORD leitura;
+	U8 mac_adr[6];
+	short i;
+#if EQUIP==MD_EQUIP
+	leitura=LerPinosEmPorta(0,0x00000EE0);
+
+	switch (leitura)
+	{
+		case 0x00000EC0:    //TCL1=0,TCL2=1,TCL3=1,TCL4=1,TCL5=1,TCL6=1
+			{
+				//	teclaAtual=TC_ESC;
+				teclaAtual=TC_PRG;
+				break;
+			}
+		case 0x00000EA0:	//TCL1=1,TCL2=0,TCL3=1,TCL4=1,TCL5=1,TCL6=1
+			{
+				//	teclaAtual=TC_LEFT;
+				teclaAtual=TC_ESC;
+				break;
+			}
+		case 0x00000E60:	//TCL1=1,TCL2=1,TCL3=0,TCL4=1,TCL5=1,TCL6=1
+			{
+				teclaAtual=TC_DOWN;
+				//	if(flag1pulso==SIM)
+				//	{
+				//	pulso1++;
+				//	flag1pulso=NAO;
+				//	}
+				//	flag1pulso=SIM;
+				break;
+			}
+		case 0x00000CE0:	//TCL1=1,TCL2=1,TCL3=1,TCL4=0,TCL5=1,TCL6=1
+			{
+				teclaAtual=TC_UP;
+				//	flag2pulso=SIM;
+				break;
+			}
+		case 0x00000AE0:	//TCL1=1,TCL2=1,TCL3=1,TCL4=1,TCL5=0,TCL6=1
+			{
+				//	teclaAtual=TC_RIGTH;
+				teclaAtual=TC_LEFT;
+				break;
+			}
+		case 0x000006E0:	//TCL1=1,TCL2=1,TCL3=1,TCL4=1,TCL5=1,TCL6=0
+			{
+				//		teclaAtual=TC_PRG;
+				teclaAtual=TC_RIGTH;
+				break;
+			}
+		default:
+			{
+				teclaAtual=TC_NULL;
+				break;
+			}
+	}
+
+	if (teclaAtual!=TC_NULL) {CiclarTelas=OFF;}
+#endif
+
+
+
+#if EQUIP==TR_EQUIP
+
+	leitura=LerPinosEmPorta(0,TECLA_RESET_IP);
+	if  (leitura!=TECLA_RESET_IP)
+	{
+
+#if (MODELO==SEM_ETHERNET_COM_RS485)
+		for (i=0;i<1000;i++)
+		{
+			Atraso(t4Mili);
+			toogleWDI();
+		}
+#endif
+
+// FELIPE: Comentado fora, n�o faze sentido alterar o mac, para mac_addr, enquanto mac_addr
+//         est� n�o inicializado na STACK!
+//#ifdef COM_MEM_COPY
+//		mem_copy (own_hw_adr, mac_adr, 6);
+//#else
+//		own_hw_adr[0]=mac_adr[0];
+//		own_hw_adr[1]=mac_adr[1];
+//		own_hw_adr[2]=mac_adr[2];
+//		own_hw_adr[3]=mac_adr[3];
+//		own_hw_adr[4]=mac_adr[4];
+//		own_hw_adr[5]=mac_adr[5];
+//#endif
+
+		IPOcteto1=10;
+		IPOcteto2=1;
+		IPOcteto3=25;
+		IPOcteto4=100;
+		MKOcteto1=255;
+		MKOcteto2=0;
+		MKOcteto3=0;
+		MKOcteto4=0;
+		GWOcteto1=10;
+		GWOcteto2=1;
+		GWOcteto3=25;
+		GWOcteto4=1;
+		//		Reservado3=0;
+		NroPorta=1001; //Na verdade 1001
+		MeuEnderecoMODBUS=1;
+		#if MD4040TI==1
+			UARTInit(BR19200, ps8O1);
+		#else
+			UARTInit(BR115200,ps8N2);
+		#endif
+		CiclarTelas=ON;
+
+		ip_config.IpAdr[0]=(U8)IPOcteto1;           // Local IP Address
+		ip_config.IpAdr[1]=(U8)IPOcteto2;           // Local IP Address
+		ip_config.IpAdr[2]=(U8)IPOcteto3;           // Local IP Address
+		ip_config.IpAdr[3]=(U8)IPOcteto4;           // Local IP Address
+		ip_config.DefGW[0]=(U8)GWOcteto1;           // Default GateWay
+		ip_config.DefGW[1]=(U8)GWOcteto2;           // Default GateWay
+		ip_config.DefGW[2]=(U8)GWOcteto3;           // Default GateWay
+		ip_config.DefGW[3]=(U8)GWOcteto4;           // Default GateWay
+		ip_config.NetMask[0]=(U8)MKOcteto1;         // Net Mask
+		ip_config.NetMask[1]=(U8)MKOcteto2;         // Net Mask
+		ip_config.NetMask[2]=(U8)MKOcteto3;         // Net Mask
+		ip_config.NetMask[3]=(U8)MKOcteto4;         // Net Mask
+		ip_config.PriDNS[0]=10;          // Primary DNS Server
+		ip_config.PriDNS[1]=1;          // Primary DNS Server
+		ip_config.PriDNS[2]=25;          // Primary DNS Server
+		ip_config.PriDNS[3]=100;          // Primary DNS Server
+		ip_config.SecDNS[0]=10;         // Secondary DNS Server
+		ip_config.SecDNS[1]=1;         // Secondary DNS Server
+		ip_config.SecDNS[2]=25;          // Secondary DNS Server
+		ip_config.SecDNS[3]=1;          // Secondary DNS Server
+
+	localm[NETIF_ETH].IpAdr[0] = ip_config.IpAdr[0];
+	localm[NETIF_ETH].IpAdr[1] = ip_config.IpAdr[1];
+	localm[NETIF_ETH].IpAdr[2] = ip_config.IpAdr[2];
+	localm[NETIF_ETH].IpAdr[3] = ip_config.IpAdr[3];
+	localm[NETIF_ETH].DefGW[0] = ip_config.DefGW[0];
+	localm[NETIF_ETH].DefGW[1] = ip_config.DefGW[1];
+	localm[NETIF_ETH].DefGW[2] = ip_config.DefGW[2];
+	localm[NETIF_ETH].DefGW[3] = ip_config.DefGW[3];
+	localm[NETIF_ETH].NetMask[0] = ip_config.NetMask[0];
+	localm[NETIF_ETH].NetMask[1] = ip_config.NetMask[1];
+	localm[NETIF_ETH].NetMask[2] = ip_config.NetMask[2];
+	localm[NETIF_ETH].NetMask[3] = ip_config.NetMask[3];
+
+
+		refresh_ip();
+
+		srv_ip[0] = 10;
+		srv_ip[1] = 1;
+		srv_ip[2] = 25;
+		srv_ip[3] = 1;
+
+		SalvaParametrizacao();
+		toogleWDI();
+#if (DEBUG_SEM_TCPIP!=SIM)
+#if (MODELO!=SEM_ETHERNET_COM_RS485)
+		refresh_ip();
+#endif
+#endif
+		//	#if (FIRST==SIM)
+		//  PowerDown();
+
+		//	#endif
+
+
+	}
+#endif
+}
+
+void setLED (DWORD led)
+{
+	DWORD m[3]={0x000000FF,0x0000FF00,0x00FF0000};
+	if ((led|m[0])==m[0])
+	{
+		LatchLED_1=LatchLED_1|led;//|(led<<16);
+	}
+
+	if ((led|m[1])==m[1])
+	{
+
+		LatchLED_2=LatchLED_2|(led>>8); //(led<<8);
+	}
+
+	if ((led|m[2])==m[2])
+	{
+		LatchLED_3=LatchLED_3|(led>>16);//|led ;
+	}
+}
+
+
+void clrLED (DWORD led)
+{
+	DWORD m[3]={0x000000FF,0x0000FF00,0x00FF0000};
+	if ((led|m[0])==m[0])
+	{
+		LatchLED_1=LatchLED_1&(~(led));
+	}
+	if ((led|m[1])==m[1])
+	{
+		LatchLED_2=LatchLED_2&(~(led>>8));
+	}
+	if ((led|m[2])==m[2])
+	{
+		LatchLED_3=LatchLED_3&(~(led>>16));
+	}
+
+
+
+
+
+}
+
+/*{
+  DWORD m[3]={0x000000FF,0x0000FF00,0x00FF0000};
+  if ((led|m[0])==m[0])
+  {
+  LatchLED_1=LatchLED_1&(~(led<<16));
+  }
+  if ((led|m[1])==m[1])
+  {
+  LatchLED_2=LatchLED_2&(~(led<<8));
+  }
+  if ((led|m[2])==m[2])
+  {
+  LatchLED_3=LatchLED_3&(~(led));
+  }
+  }  */
+
+void clrALL_LEDs()
+{
+	char i;
+	DWORD n;
+
+	n=0x00000001;
+	clrLED(n);
+	for (i=2;i<=21;i++)
+	{
+		n=n<<1;
+		clrLED(n);
+	}
+}
+
+void setAll_LEDs()
+{
+	char i;
+	DWORD n;
+
+	n=0x00000001;
+	setLED(n);
+	for (i=2;i<=21;i++)
+	{
+		n=n<<1;
+		setLED(n);
+	}
+}
+
+
+void TelaValoresTrifasicos(float grandeza1,float grandeza2,float grandeza3)
+{
+	setLED(LED_FaseA);
+	setLED(LED_FaseB);
+	setLED(LED_FaseC);
+	WriteFloatString(grandeza1,dpyLINHA1);
+	WriteFloatString(grandeza2,dpyLINHA2);
+	WriteFloatString(grandeza3,dpyLINHA3);
+}
+
+
+void WriteIntString(short ii,char canal){
+	char str[6];
+	char *pstr;
+	IntToStr(ii,&str[0]);
+	pstr=&str[0];
+	WriteString(canal,pstr);
+}
+
+
+void WriteFloatString(float f,char canal){
+	char str[6];
+	char *pstr;
+	int FlagKilo,FlagMenos;
+
+	FloatToStr(f,&str[0],&FlagKilo,&FlagMenos);
+	pstr=&str[0];
+	switch (canal)
+	{
+		case dpyLINHA1:
+			{
+				if (FlagKilo==ON) {setLED(LED_KiloA);} else {clrLED(LED_KiloA);}
+				if (FlagMenos==ON) {setLED(LED_MinA);} else {clrLED(LED_MinA);}
+				break;
+			}
+		case dpyLINHA2:
+			{
+				if (FlagKilo==ON) {setLED(LED_KiloB);} else {clrLED(LED_KiloB);}
+				if (FlagMenos==ON) {setLED(LED_MinB);} else {clrLED(LED_MinB);}
+				break;
+			}
+		case dpyLINHA3:
+			{
+				if (FlagKilo==ON) {setLED(LED_KiloC);} else {clrLED(LED_KiloC);}
+				if (FlagMenos==ON) {setLED(LED_MinC);} else {clrLED(LED_MinC);}
+				break;
+			}
+	}
+
+	WriteString(canal,pstr);
+
+}
+
+
+void InttoBCD(unsigned short numero, char *milhar, char *centena, char *dezena, char *unidade)
+{
+	*milhar=numero/1000;
+
+	*centena=(numero-*milhar*1000)/100;
+	*dezena=(numero-*milhar*1000-*centena*100)/10;
+	*unidade=(numero-*milhar*1000-*centena*100-*dezena*10);
+}
+
+long int divround1(float a, float b )
+{
+	/*
+	   float r;
+	   r=(a/b)-(long int)(a/b);
+	   if (r>0.5)
+	   {
+	   return((long int)(a/b)+1);
+	   }
+	   else
+	   {
+	   return((long int)(a/b));
+	   }
+	 */
+	return ( (long int)(a/b + 0.5) );
+
+}
+
+
+unsigned short BCDtoInt(char milhar, char centena, char dezena, char unidade)
+{
+	return(milhar*1000+centena*100+dezena*10+unidade);
+}
+
+/*
+   void AtualizaParametrizacao()
+   {
+   relacaoTP=(float)relacaoTPfat*((float)relacaoTPpri/(float)relacaoTPsec);
+   relacaoTC=(float)relacaoTCfat*((float)relacaoTCpri/(float)relacaoTCsec);
+
+
+   if (zeraConsumos=='S')
+   {
+//aqui � apagado o consumo
+ConsumoT=0;ConsumoA=0; ConsumoB=0;ConsumoC=0;
+EnergGerT=0;EnergGerA=0;EnergGerB=0;EnergGerC=0;
+EnergIndT=0;EnergIndA=0;EnergIndB=0;EnergIndC=0;
+EnergCapT=0; EnergCapA=0;EnergCapB=0;EnergCapC=0;
+pulso1=0;
+pulso2=0;
+zeraConsumos='n';
+}
+}
+ */
+
+
+
+/*
+   typedef struct _RelesStruct{
+//endereco modbus das grandezas que serao comparadas com os setpoints
+short eRgrandeza1;
+short eRgrandeza2;
+short eRgrandeza3;
+//setpoints
+short Rsetpoint1;
+short Rsetpoint2;
+short Rsetpoint3;
+//setpoints
+short RtempoObservacao;	//se 'infinito' nunca liga o RELE!
+//tipo de compara�ao
+short RtipoDeComparacao;
+} RelesStruct;
+ */
+
+
+void OperaRele(short QualRele,short OnOff)
+{
+
+
+
+
+	switch (QualRele)
+	{
+		case 1:
+			{
+				if (OnOff==OFF)
+				{
+
+#if ((EQUIP_LINHA50 != MD_EQUIP))
+	  HAL_GPIO_WritePin(ALARM1_GPIO_Port,ALARM1_Pin, GPIO_PIN_RESET);
+#endif
+					StatusDeTodosOsReles=StatusDeTodosOsReles&0x0FFF;
+
+				}
+				else
+				{
+#if ((EQUIP_LINHA50 != MD_EQUIP))
+	  HAL_GPIO_WritePin(ALARM1_GPIO_Port,ALARM1_Pin, GPIO_PIN_SET);
+#endif
+					StatusDeTodosOsReles=StatusDeTodosOsReles|0xF000;
+
+				}
+
+				break;
+			}
+		case 2:
+			{
+				if (OnOff==OFF)
+				{
+#if ((EQUIP_LINHA50 != MD_EQUIP))
+	  HAL_GPIO_WritePin(ALARM2_GPIO_Port,ALARM2_Pin, GPIO_PIN_RESET);
+#endif
+					StatusDeTodosOsReles=StatusDeTodosOsReles&0xF0FF;
+
+				}
+				else
+				{
+#if ((EQUIP_LINHA50 != MD_EQUIP))
+	  HAL_GPIO_WritePin(ALARM2_GPIO_Port,ALARM2_Pin, GPIO_PIN_SET);
+#endif
+					StatusDeTodosOsReles=StatusDeTodosOsReles|0x0F00;
+
+				}
+
+
+				break;
+			}
+		case 3:
+			{
+				if (OnOff==OFF)
+				{
+#if ((EQUIP_LINHA50 != MD_EQUIP))
+	  HAL_GPIO_WritePin(ALARM3_GPIO_Port,ALARM3_Pin, GPIO_PIN_RESET);
+#endif
+					StatusDeTodosOsReles=StatusDeTodosOsReles&0xFF0F;
+
+				}
+				else
+				{
+#if ((EQUIP_LINHA50 != MD_EQUIP))
+	  HAL_GPIO_WritePin(ALARM3_GPIO_Port,ALARM3_Pin, GPIO_PIN_SET);
+#endif
+					StatusDeTodosOsReles=StatusDeTodosOsReles|0x00F0;
+
+				}
+				break;
+			}
+	}
+
+}
+
+
+
+short AvaliaRele(RelesStruct ReleX, short QualRele)
+{
+
+#ifdef CLIENTE_SETPOINT_X_1000
+	float ReleXRsetpoint1;
+	float ReleXRsetpoint2;
+	float ReleXRsetpoint3;
+#endif
+
+	float *GrandezaA;
+	float *GrandezaB;
+	float *GrandezaC;
+
+	float *GrandezaComparacaoA;
+	float *GrandezaComparacaoB;
+	float *GrandezaComparacaoC;
+
+	static short contadorRele[3];
+
+	GrandezaA=(float*)(2*ReleX.eRgrandeza1+(unsigned long int)&Versao);
+	GrandezaB=(float*)(2*ReleX.eRgrandeza2+(unsigned long int)&Versao);
+	GrandezaC=(float*)(2*ReleX.eRgrandeza3+(unsigned long int)&Versao);
+
+	GrandezaComparacaoA=(float*)(2*ReleX.Rsetpoint1+(unsigned long int)&Versao);
+	GrandezaComparacaoB=(float*)(2*ReleX.Rsetpoint2+(unsigned long int)&Versao);
+	GrandezaComparacaoC=(float*)(2*ReleX.Rsetpoint3+(unsigned long int)&Versao);
+
+
+
+#ifdef CLIENTE_SETPOINT_X_1000
+	ReleXRsetpoint1= 1000.0*(float)ReleX.Rsetpoint1;
+	ReleXRsetpoint2= 1000.0*(float)ReleX.Rsetpoint2;
+	ReleXRsetpoint3= 1000.0*(float)ReleX.Rsetpoint3;
+#endif
+
+	if (ReleX.eRgrandeza1==0)
+	{
+		return (0);
+	}
+
+	//switch (ReleX.RtipoDeComparacao)
+	{
+		/*case 0: //
+		  {
+		  return(0);
+		  }*/
+		//case COMPARACAO_TIPO1: //compara��o tipo 1;
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO1)
+		{
+#ifndef CLIENTE_SETPOINT_X_1000
+			//if ((*GrandezaA>ReleX.Rsetpoint1)&&(*GrandezaB>ReleX.Rsetpoint2)&&(*GrandezaC>ReleX.Rsetpoint3))
+			if ((*GrandezaA>*GrandezaComparacaoA)&&(*GrandezaB>*GrandezaComparacaoB)&&(*GrandezaC>*GrandezaComparacaoC))
+#else
+				if ((*GrandezaA>ReleXRsetpoint1)&&(*GrandezaB>ReleXRsetpoint2)&&(*GrandezaC>ReleXRsetpoint3))
+#endif
+				{
+					contadorRele[QualRele]++;//habilita contador
+				}
+				else
+				{
+					contadorRele[QualRele]=0;//zera contador
+					OperaRele(QualRele,OFF);
+				}
+			//	break;
+		}
+		//case COMPARACAO_TIPO2: //compara��o tipo 2;
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO2)
+		{
+#ifndef CLIENTE_SETPOINT_X_1000
+			//  	if ((*GrandezaA<ReleX.Rsetpoint1)&&(*GrandezaB<ReleX.Rsetpoint2)&&(*GrandezaC<ReleX.Rsetpoint3))
+			if ((*GrandezaA<*GrandezaComparacaoA)&&(*GrandezaB<*GrandezaComparacaoB)&&(*GrandezaC<*GrandezaComparacaoC))
+
+#else
+				if ((*GrandezaA<ReleXRsetpoint1)&&(*GrandezaB<ReleXRsetpoint2)&&(*GrandezaC<ReleXRsetpoint3))
+#endif
+				{
+					contadorRele[QualRele]++; //habilita contador
+				}
+				else
+				{
+					contadorRele[QualRele]=0; //zera contador
+					OperaRele(QualRele,OFF);
+				}
+			//break;
+		}
+
+		//case COMPARACAO_TIPO3: //compara��o tipo 3;
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO3)
+		{
+#ifndef CLIENTE_SETPOINT_X_1000
+			//if ((*GrandezaA>ReleX.Rsetpoint1)||(*GrandezaB>ReleX.Rsetpoint2)||(*GrandezaC>ReleX.Rsetpoint3))
+			if ((*GrandezaA>*GrandezaComparacaoA)||(*GrandezaB>*GrandezaComparacaoB)||(*GrandezaC>*GrandezaComparacaoC))
+#else
+				if ((*GrandezaA>ReleXRsetpoint1)||(*GrandezaB>ReleXRsetpoint2)||(*GrandezaC>ReleXRsetpoint3))
+#endif
+				{
+					contadorRele[QualRele]++;//habilita contador
+				}
+				else
+				{
+					contadorRele[QualRele]=0;//zera contador
+					OperaRele(QualRele,OFF);
+				}
+			//break;
+		}
+		//case COMPARACAO_TIPO4: //compara��o tipo 4
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO4)
+		{
+#ifndef CLIENTE_SETPOINT_X_1000
+			//  	if ((*GrandezaA<ReleX.Rsetpoint1)||(*GrandezaB<ReleX.Rsetpoint2)||(*GrandezaC<ReleX.Rsetpoint3))
+			if ((*GrandezaA<*GrandezaComparacaoA)||(*GrandezaB<*GrandezaComparacaoB)||(*GrandezaC<*GrandezaComparacaoC))
+#else
+				if ((*GrandezaA<ReleXRsetpoint1)||(*GrandezaB<ReleXRsetpoint2)||(*GrandezaC<ReleXRsetpoint3))
+#endif
+				{
+					contadorRele[QualRele]++; //habilita contador
+				}
+				else
+				{
+					contadorRele[QualRele]=0; //zera contador
+					OperaRele(QualRele,OFF);
+				}
+			//	break;
+		}
+
+		//case COMPARACAO_TIPO5: //compara��o tipo 5;
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO5)
+		{
+#ifndef CLIENTE_SETPOINT_X_1000
+			//if ((*GrandezaA>ReleX.Rsetpoint1))
+			if ((*GrandezaA>(*GrandezaComparacaoA)))
+#else
+				if ((*GrandezaA>ReleXRsetpoint1))
+#endif
+				{
+					contadorRele[QualRele]++; //habilita contador
+				}
+				else
+				{
+					contadorRele[QualRele]=0; //zera contador
+					OperaRele(QualRele,OFF);
+				}
+			//break;
+		}
+		//case COMPARACAO_TIPO6: //compara��o tipo 6;
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO6)
+		{
+#ifndef CLIENTE_SETPOINT_X_1000
+			//	if ((*GrandezaA<ReleX.Rsetpoint1))
+			if ((*GrandezaA<(*GrandezaComparacaoA)))
+#else
+				if ((*GrandezaA<ReleXRsetpoint1))
+#endif
+				{
+					contadorRele[QualRele]++; //habilita contador
+				}
+				else
+				{
+					contadorRele[QualRele]=0; //zera contador
+					OperaRele(QualRele,OFF);
+				}
+			//break;
+		}
+		//case COMPARACAO_TIPO7: //compara��o tipo 7; N�O FAZ NADA
+		if (ReleX.RtipoDeComparacao ==COMPARACAO_TIPO7)
+		{
+			OperaRele(QualRele,OFF);
+			contadorRele[QualRele]=0; //zera contador
+		}
+	}
+
+	if (contadorRele[QualRele]==ReleX.RtempoObservacao)
+	{
+		OperaRele(QualRele,ON);
+		GravaNaBatteryRAM(REG_BATT_MEM_ALT_RELES);
+	}
+
+	if (contadorRele[QualRele]>=ReleX.RtempoObservacao)
+	{
+		contadorRele[QualRele]=ReleX.RtempoObservacao+1;
+	}
+
+
+	return(1);
+
+
+}
+
+
+
+void atualizaDevName(void)
+{
+	lhost_name[1]=dev_name[0];
+	lhost_name[0]=dev_name[1];
+	lhost_name[3]=dev_name[2];
+	lhost_name[2]=dev_name[3];
+	lhost_name[5]=dev_name[4];
+	lhost_name[4]=dev_name[5];
+	lhost_name[7]=dev_name[6];
+	lhost_name[6]=dev_name[7];
+	lhost_name[9]=dev_name[8];
+	lhost_name[8]=dev_name[9];
+	lhost_name[11]=dev_name[10];
+	lhost_name[10]=dev_name[11];
+	lhost_name[13]=dev_name[12];
+	lhost_name[12]=dev_name[13];
+	//lhost_name[15]=dev_name[14];
+	//lhost_name[14]=dev_name[15];
+}
+
+
+#if EQUIP_LINHA50 == CA_EQUIP
+void TelaTR1(int NTela)
+{
+	char strE[12];
+	char str[12];
+	int FlagKilo,FlagMenos;
+
+	if (NTela==0)
+	{
+
+		PrtLcd("CA50      VF.",0,0);
+		PrtLcd((char *)&versao_str[0],0,13);
+		PrtLcd("     NS:",1,0);
+		PrtLcd((char *)&nserie_str[0],1,8);
+
+
+	}
+
+	if ((NTela==1))
+	{
+
+		FloatToStr(UrmsA,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E1:              V",0,0);
+		PrtLcd(strE,0,3);
+
+		FloatToStr(UrmsB,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E2:              V",1,0);
+		PrtLcd(strE,1,3);
+
+		FloatToStr(UrmsC,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E3:             mA",2,0);
+		PrtLcd(strE,2,3);
+
+		FloatToStr(IrmsA,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E4:             mA",3,0);
+		PrtLcd(strE,3,3);
+
+
+	}
+
+	if (NTela==2)
+    {
+
+				PosCur(0,0);
+				PrtLcd("ENDERECO IP:    ",0,0);
+				PosCur(1,0);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[0]);
+				WrLcdData('.');
+				PosCur(1,4);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[1]);
+				WrLcdData('.');
+				PosCur(1,8);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[2]);
+				WrLcdData('.');
+				PosCur(1,12);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[3]);
+				PrtLcd(" ",1,15);
+
+				PrtLcd("PORTA:",3,0);
+
+			    if (NroPorta>10000)
+				{
+				Sys_HexBcd(NroPorta-10000);
+				PosCur(4,0);
+				PrtLcdBcdNibble(4,0);
+				}
+				else
+				{
+				Sys_HexBcd(NroPorta);
+				PosCur(4,0);
+				}
+
+
+
+				PrtLcdBcdNumber(Zaz[1]);
+				PrtLcdBcdNumber(Zaz[0]);
+				PrtLcd("                ",4,5);
+
+	}
+
+}
+#endif
+
+
+#if EQUIP_LINHA50 == CP_EQUIP
+void TelaTR1(int NTela)
+{
+	char strE[12];
+
+	if (NTela==0)
+	{
+
+
+		PrtLcd("                     ",2,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",4,0);
+
+
+		PrtLcd("CP50      VF.",0,0);
+		PrtLcd((char *)&versao_str[0],0,13);
+		PrtLcd("  ",0,17);
+
+		PrtLcd("     NS:",1,0);
+		PrtLcd((char *)&nserie_str[0],1,8);
+		PrtLcd("    ",1,16);
+		//PrtLcd("123456789012345678",3,0);cada linha tem 18 colunas: de 0 a 17
+
+	}
+
+	if ((NTela==1))
+	{
+		PrtLcd("                     ",1,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",5,0);
+		//PrtLcd("123456789012345678",3,0);
+	   	PrtLcd("E1: ",0,0); PrtLcd("         ",0,10);
+		PrtLcd("E2: ",2,0); PrtLcd("         ",2,10);
+		PrtLcd("E3: ",4,0); PrtLcd("         ",4,10);
+
+		IntToStr1((int)pulso_cp_1,&strE[0] );
+		PrtLcd(strE,0,4);
+		IntToStr1((int)pulso_cp_2,&strE[0] );
+		PrtLcd(strE,2,4);
+		IntToStr1((int)pulso_cp_3,&strE[0] );
+		PrtLcd(strE,4,4);
+
+
+
+
+	}
+	if ((NTela==2))
+	{
+		PrtLcd("                     ",1,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",5,0);
+		//PrtLcd("123456789012345678",3,0);
+	   	PrtLcd("E4: ",0,0); PrtLcd("         ",0,10);
+		PrtLcd("E5: ",2,0); PrtLcd("         ",2,10);
+		PrtLcd("E6: ",4,0); PrtLcd("         ",4,10);
+
+
+
+		IntToStr1((int)pulso_cp_4,&strE[0] );
+		PrtLcd(strE,0,4);
+		IntToStr1((int)pulso_cp_5,&strE[0] );
+		PrtLcd(strE,2,4);
+		IntToStr1((int)pulso_cp_6,&strE[0] );
+		PrtLcd(strE,4,4);
+	}
+
+	if (NTela==3)
+    {
+		PrtLcd("                     ",2,0);
+
+				PosCur(0,0);
+				PrtLcd("ENDERECO IP:    ",0,0);
+				PosCur(1,0);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[0]);
+				WrLcdData('.');
+				PosCur(1,4);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[1]);
+				WrLcdData('.');
+				PosCur(1,8);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[2]);
+				WrLcdData('.');
+				PosCur(1,12);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[3]);
+				PrtLcd(" ",1,15);
+
+				PrtLcd("PORTA:",3,0);
+
+				IntToStr1((int)NroPorta,&strE[0] );
+				PrtLcd(strE,4,0);
+
+				/*
+
+			    if (NroPorta>10000)
+				{
+				Sys_HexBcd(NroPorta-10000);
+				PosCur(4,0);
+				PrtLcdBcdNibble(4,0);
+				}
+				else
+				{
+				Sys_HexBcd(NroPorta);
+				PosCur(4,0);
+				}
+
+
+
+				PrtLcdBcdNumber(Zaz[1]);
+				PrtLcdBcdNumber(Zaz[0]);
+				*/
+				PrtLcd("                ",4,6);
+
+	}
+
+}
+#endif
+
+
+#if EQUIP_LINHA50 == CD_EQUIP
+void TelaTR1(int NTela)
+{
+	char strE[12];
+
+	if (NTela==0)
+	{
+
+
+		PrtLcd("                     ",2,0);
+		PrtLcd("                     ",4,0);
+
+
+		PrtLcd("CD50      VF.",0,0);
+		PrtLcd((char *)&versao_str[0],0,13);
+		PrtLcd("     NS:",1,0);
+		PrtLcd((char *)&nserie_str[0],1,8);
+		PrtLcd("    ",1,16);
+
+
+	}
+
+	if ((NTela==1))
+	{
+		PrtLcd("                     ",1,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",5,0);
+
+		if (pulso_cp_1!=0)
+		    PrtLcd("E1: ON               ",0,0);
+		else
+			PrtLcd("E1: OFF              ",0,0);
+		if (pulso_cp_2!=0)
+			PrtLcd("E2: ON               ",2,0);
+		else
+			PrtLcd("E2: OFF              ",2,0);
+		if (pulso_cp_3!=0)
+			PrtLcd("E3: ON               ",4,0);
+		else
+			PrtLcd("E3: OFF              ",4,0);
+
+
+
+
+
+
+	}
+	if ((NTela==2))
+	{
+		PrtLcd("                     ",1,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",5,0);
+
+		if (pulso_cp_4!=0)
+		    PrtLcd("E4: ON               ",0,0);
+		else
+			PrtLcd("E4: OFF              ",0,0);
+		if (pulso_cp_5!=0)
+			PrtLcd("E5: ON               ",2,0);
+		else
+			PrtLcd("E5: OFF              ",2,0);
+		if (pulso_cp_6!=0)
+			PrtLcd("E6: ON               ",4,0);
+		else
+			PrtLcd("E6: OFF              ",4,0);
+	}
+
+	if (NTela==3)
+    {
+		PrtLcd("                     ",2,0);
+
+				PosCur(0,0);
+				PrtLcd("ENDERECO IP:    ",0,0);
+				PosCur(1,0);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[0]);
+				WrLcdData('.');
+				PosCur(1,4);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[1]);
+				WrLcdData('.');
+				PosCur(1,8);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[2]);
+				WrLcdData('.');
+				PosCur(1,12);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[3]);
+				PrtLcd(" ",1,15);
+
+
+
+				IntToStr1((int)NroPorta,&strE[0] );
+				PrtLcd(strE,4,0);
+
+				/*
+
+			    if (NroPorta>10000)
+				{
+				Sys_HexBcd(NroPorta-10000);
+				PosCur(4,0);
+				PrtLcdBcdNibble(4,0);
+				}
+				else
+				{
+				Sys_HexBcd(NroPorta);
+				PosCur(4,0);
+				}
+
+
+
+				PrtLcdBcdNumber(Zaz[1]);
+				PrtLcdBcdNumber(Zaz[0]);
+				*/
+				PrtLcd("                ",4,6);
+
+
+
+
+	}
+
+}
+#endif
+
+#if EQUIP_LINHA50 == CT_EQUIP
+void TelaTR1(int NTela)
+{
+	char strE[12];
+	char str[12];
+	int FlagKilo,FlagMenos;
+
+	if (NTela==0)
+	{
+
+		PrtLcd("CT50      VF.",0,0);
+		PrtLcd((char *)&versao_str[0],0,13);
+		PrtLcd("     NS:",1,0);
+		PrtLcd((char *)&nserie_str[0],1,8);
+
+
+	}
+
+	if ((NTela==1))
+	{
+		PrtLcd("                     ",1,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",5,0);
+
+		FloatToStr(UrmsA,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E1:             °C",0,0);
+		PrtLcd(strE,0,3);
+
+		FloatToStr(UrmsB,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E2:             °C",2,0);
+		PrtLcd(strE,2,3);
+
+		FloatToStr(UrmsC,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E3:             °C",4,0);
+		PrtLcd(strE,4,3);
+
+	}
+
+	if ((NTela==2))
+	{
+		PrtLcd("                     ",1,0);
+		PrtLcd("                     ",3,0);
+		PrtLcd("                     ",5,0);
+
+		FloatToStr(IrmsA,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E4:             °C",0,0);
+		PrtLcd(strE,0,3);
+
+		FloatToStr(IrmsB,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E5:             °C",2,0);
+		PrtLcd(strE,2,3);
+
+		FloatToStr(IrmsC,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("E6:             °C",4,0);
+		PrtLcd(strE,4,3);
+
+	}
+
+	if (NTela==3)
+    {
+
+				PosCur(0,0);
+				PrtLcd("ENDERECO IP:    ",0,0);
+				PosCur(1,0);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[0]);
+				WrLcdData('.');
+				PosCur(1,4);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[1]);
+				WrLcdData('.');
+				PosCur(1,8);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[2]);
+				WrLcdData('.');
+				PosCur(1,12);
+				If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[3]);
+				PrtLcd(" ",1,15);
+
+
+				IntToStr1((int)NroPorta,&strE[0] );
+				PrtLcd(strE,4,0);
+
+				/*
+
+			    if (NroPorta>10000)
+				{
+				Sys_HexBcd(NroPorta-10000);
+				PosCur(4,0);
+				PrtLcdBcdNibble(4,0);
+				}
+				else
+				{
+				Sys_HexBcd(NroPorta);
+				PosCur(4,0);
+				}
+
+
+
+				PrtLcdBcdNumber(Zaz[1]);
+				PrtLcdBcdNumber(Zaz[0]);
+				*/
+				PrtLcd("                ",4,6);
+
+	}
+
+}
+#endif
+
+#if EQUIP_LINHA50 == MD_EQUIP
+void TelaTR1(int NTela)
+{
+	char strE[12];
+	char str[12];
+//	char *pstr;
+	int FlagKilo,FlagMenos;
+
+	if (NTela==0)
+	{
+		//   FloatToStrForEnergy(ConsumoT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		PrtLcd("MD50      VF.",0,0);
+		PrtLcd((char *)&versao_str[0],0,13);
+		PrtLcd("   ",0,17);
+		PrtLcd("     NS:",1,0);
+		PrtLcd((char *)&nserie_str[0],1,8);
+		PrtLcd("   ",1,16);
+		//PrtLcd("capacit. [KVArh]",1,0);
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+
+	}
+
+
+	if ((NTela==1))
+	{
+		/*   UrmsA=342.4459738225;
+			 IrmsA=57598.23;
+			 FatPotA=-0.863423;
+			 PotAtivA=-267775.67567;
+		 */
+
+		FloatToStr(UrmsA,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		#ifdef TR_INVERSOR
+		PrtLcd("                ",0,0);
+		#else
+		PrtLcd("A                 ",0,0);
+		#endif
+		PrtLcd(strE,0,2);
+		if (FlagKilo==1) {
+			PrtLcd("K",0,7);
+			PrtLcd("V",0,8);
+		}
+		else
+		{
+			PrtLcd("V",0,7);
+		}
+
+		FloatToStr(FatPotA,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd(strE,0,11);
+		if (FlagMenos==1) {
+			PrtLcd("-",0,10);
+		}
+
+
+		FloatToStr(IrmsA,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd("               W",1,0);
+		PrtLcd(strE,1,0);
+		if (FlagKilo==1) {
+			PrtLcd("K",1,5);
+			PrtLcd("A",1,6);
+		}
+		else
+		{
+			PrtLcd("A",1,5);
+		}
+
+		FloatToStr(PotAtivA,&strE[0],&FlagKilo,&FlagMenos);//+algarismos
+		PrtLcd(strE,1,9);
+		if (FlagMenos==1) {
+			PrtLcd("-",1,8);
+		}
+		if (FlagKilo==1) {
+			PrtLcd("K",1,14);
+		}
+		else
+		{
+			PrtLcd(" ",1,14);
+		}
+
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+	}
+
+
+	if (NTela==2)
+	{
+		/*UrmsA=34244.59738225;
+		  IrmsA=575.9823;
+		  FatPotA=0.863423;
+		  PotAtivA=267.77567567;*/
+
+		FloatToStr(UrmsB,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("B               ",0,0);
+		PrtLcd(strE,0,2);
+		if (FlagKilo==1) {
+			PrtLcd("K",0,7);
+			PrtLcd("V",0,8);
+		}
+		else
+		{
+			PrtLcd("V",0,7);
+		}
+
+		FloatToStr(FatPotB,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd(strE,0,11);
+		if (FlagMenos==1) {
+			PrtLcd("-",0,10);
+		}
+
+
+		FloatToStr(IrmsB,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd("               W",1,0);
+		PrtLcd(strE,1,0);
+		if (FlagKilo==1) {
+			PrtLcd("K",1,5);
+			PrtLcd("A",1,6);
+		}
+		else
+		{
+			PrtLcd("A",1,5);
+		}
+		FloatToStr(PotAtivB,&strE[0],&FlagKilo,&FlagMenos);//+algarismos
+		PrtLcd(strE,1,9);
+		if (FlagMenos==1) {
+			PrtLcd("-",1,8);
+		}
+		if (FlagKilo==1) {
+			PrtLcd("K",1,14);
+		}
+		else
+		{
+			PrtLcd(" ",1,14);
+		}
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+	}
+	if (NTela==3)
+	{
+		/*UrmsA=34.24459738225;
+		  IrmsA=5.759823;
+		  FatPotA=1.00000;
+		  PotAtivA=267775.67567;*/
+
+		FloatToStr(UrmsC,&strE[0],&FlagKilo,&FlagMenos); //mudar o algoritmo de forma a fixar
+		PrtLcd("C               ",0,0);
+		PrtLcd(strE,0,2);
+		if (FlagKilo==1) {
+			PrtLcd("K",0,7);
+			PrtLcd("V",0,8);
+		}
+		else
+		{
+			PrtLcd("V",0,7);
+		}
+
+		FloatToStr(FatPotC,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd(strE,0,11);
+		if (FlagMenos==1) {
+			PrtLcd("-",0,10);
+		}
+
+
+		FloatToStr(IrmsC,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd("               W",1,0);
+		PrtLcd(strE,1,0);
+		if (FlagKilo==1) {
+			PrtLcd("K",1,5);
+			PrtLcd("A",1,6);
+		}
+		else
+		{
+			PrtLcd("A",1,5);
+		}
+
+		FloatToStr(PotAtivC,&strE[0],&FlagKilo,&FlagMenos);//+algarismos
+		PrtLcd(strE,1,9);
+		if (FlagMenos==1) {
+			PrtLcd("-",1,8);
+		}
+		if (FlagKilo==1) {
+			PrtLcd("K",1,14);
+		}
+		else
+		{
+			PrtLcd(" ",1,14);
+		}
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+	}
+	if (NTela==4)
+	{
+		//PotAtivT=4242342.36427348;
+		//FatPotT=-0.6342;
+
+		PrtLcd("T               ",0,0);
+		FloatToStr(PotAtivT,&strE[0],&FlagKilo,&FlagMenos);
+		FloatToStrForEnergy(PotAtivT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		if (FlagMenos==1) {
+			PrtLcd("-",0,1);
+		}
+		PrtLcd(strE,0,2);
+		PrtLcd("   [KW]",0,9);
+		PrtLcd("T               ",1,0);
+		FloatToStr(FatPotT,&strE[0],&FlagKilo,&FlagMenos);
+		PrtLcd(strE,1,3);
+		if (FlagMenos==1) {
+			PrtLcd("-",1,2);
+		}
+		PrtLcd("    [FP]",1,8);
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+	}
+
+	if (NTela==5)
+	{
+		/*PotAparT=4242342.36427348;
+		  PotReatT=4242342.36427348;	*/
+
+		PrtLcd("T               ",0,0);
+		FloatToStrForEnergy(PotAparT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		PrtLcd(strE,0,2);
+		PrtLcd(" [KVA]",0,10);
+
+		PrtLcd("T               ",1,0);
+		FloatToStr(PotReatT,&strE[0],&FlagKilo,&FlagMenos);
+		FloatToStrForEnergy(PotReatT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		PrtLcd(strE,1,2);
+		if (FlagMenos==1) {
+			PrtLcd("-",1,1);
+		}
+		PrtLcd(" [KVAr]",1,9);
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+
+	}
+	if (NTela==6)
+	{
+		PrtLcd("T               ",0,0);
+		FloatToStrForEnergy(ConsumoT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		PrtLcd(strE,0,2);
+		PrtLcd("      ",0,10);
+		PrtLcd("Consumo    [KWh]",1,0);
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+	}
+	if (NTela==7)
+	{
+		PrtLcd("T               ",0,0);
+		FloatToStrForEnergy(EnergIndT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		PrtLcd(strE,0,2);
+		PrtLcd("      ",0,10);
+		PrtLcd("indutiv. [KVArh]",1,0);
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+	}
+	if (NTela==8)
+	{
+		PrtLcd("T               ",0,0);
+		FloatToStrForEnergy(EnergCapT*0.001,&strE[0]);  //mudar algoritmo para permitir mais algaritmos
+		PrtLcd(strE,0,2);
+		PrtLcd("      ",0,10);
+		PrtLcd("capacit. [KVArh]",1,0);
+		PrtLcd("          ",3,0);
+		PrtLcd("          ",4,0);
+
+	}
+
+		if (NTela==9)
+		{
+			//RTCTime LocalTime;
+			//LocalTime=RTCGetTime();
+			PosCur(0,0);
+
+			PrtLcd("ENDERECO IP:       ",0,0);
+			PosCur(1,0);
+			If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[0]);
+			WrLcdData('.');
+			PosCur(1,4);
+			If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[1]);
+			WrLcdData('.');
+			PosCur(1,8);
+			If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[2]);
+			WrLcdData('.');
+			PosCur(1,12);
+			If_PutInt((unsigned int)localm[NETIF_ETH].IpAdr[3]);
+			PrtLcd("    ",1,15);
+
+
+
+			IntToStr1((int)NroPorta,&strE[0] );
+			PrtLcd(strE,4,0);
+
+			/*
+
+		    if (NroPorta>10000)
+			{
+			Sys_HexBcd(NroPorta-10000);
+			PosCur(4,0);
+			PrtLcdBcdNibble(4,0);
+			}
+			else
+			{
+			Sys_HexBcd(NroPorta);
+			PosCur(4,0);
+			}
+
+
+
+			PrtLcdBcdNumber(Zaz[1]);
+			PrtLcdBcdNumber(Zaz[0]);
+			*/
+			PrtLcd("                ",4,6);
+
+
+
+			//Sys_HexBcd((short)ip_config.IpAdr[3]);
+			//PrtLcdBcdNumber2(Zaz[3]);
+
+
+			//PosCur(1,0);
+			//Sys_HexBcd(LocalTime.RTC_Mday);
+			//PrtLcdBcdNumber(Zaz[0]);
+			//WrLcdData('.');
+			//PrtLcdBcdNibble(IPOcteto2,0);
+			//PrtLcdBcdNibble(IPOcteto3,0);
+		}
+}
+#endif
+
+
+void Sys_HexBcd(unsigned long int numero)
+{
+	char milhar; char centena; char dezena; char unidade;
+	char dezmilesimo;char decimo; char milesimo;
+
+	/*char unidade=0,dezena=0,centena=0,milhar=0,decimo=0,centesimo=0,milesimo=0;
+	  long int centCemMil,dezDezMil,uniMil,decmCem,centmDez;
+
+	  centena=(char)((long int)numero/100000);
+	  centCemMil=(long int)centena*100000;
+
+	  dezena=(char)((numero-centCemMil)/10000);
+	  dezDezMil=(long int)dezena*10000;
+
+	  unidade=(char)((numero-centCemMil-dezDezMil)/1000);
+	  uniMil=(long int)unidade*1000;
+
+	  decimo=(char)((numero-centCemMil-dezDezMil-uniMil)/100);
+	  decmCem=(long int)decimo*100;
+
+	  centesimo=(char)((numero-centCemMil-dezDezMil-uniMil-decmCem)/10);
+	  centmDez=(long int)centesimo*10;
+
+	  milesimo=(char)(numero-centCemMil-dezDezMil-uniMil-decmCem-centmDez);
+
+	  Z[3]=milhar;
+	  Z[2]=dezena|(centena<<4);
+	  Z[1]=decimo|(unidade<<4);
+	  Z[0]=milesimo|(centesimo<<4);
+	 */
+
+
+	milhar=  (char)((float)(numero/1000000));
+	centena= (char)((float)(numero-(float)milhar*1000000)/100000);
+	dezena=  (char)((float)(numero-(float)milhar*1000000-(float)centena*100000)/10000);
+	unidade= (char)((float)(numero-(float)milhar*1000000-(float)centena*100000-(float)dezena*10000)/1000);
+	decimo=  (char)((float)(numero-(float)milhar*1000000-(float)centena*100000-(float)dezena*10000-(float)unidade*1000)/100);
+	milesimo=(char)((float)(numero-(float)milhar*1000000-(float)centena*100000-(float)dezena*10000-(float)unidade*1000-(float)decimo*100)/10);
+	dezmilesimo=(char)((float)(numero-(float)milhar*1000000-(float)centena*100000-(float)dezena*10000-(float)unidade*1000-(float)decimo*100-(float)milesimo*10));
+
+	Zaz[3]=milhar;
+	Zaz[2]=dezena|(centena<<4);
+	Zaz[1]=decimo|(unidade<<4);
+	Zaz[0]=dezmilesimo|(milesimo<<4);
+
+	/*
+	   InttoBCD((unsigned short)numero, &milhar, &centena, &dezena, &unidade);
+	   Z[3]=milhar;
+	   Z[2]=dezena|(centena<<4);
+	   Z[1]=decimo|(unidade<<4);
+	   Z[0]=milesimo|(centesimo<<4);
+
+	   Z[3]=milhar;
+	   Z[2]=dezena|(centena<<4);
+	   Z[1]=*milhar|(*centena<<4);
+	   Z[0]=*unidade|(*dezena<<4);
+
+	   {
+
+	 *milhar=numero/1000000;
+	 *centena=( numero-*milhar*1000000)/100000;
+	 *dezena=  (numero-*milhar*1000000-*centena*100000)/10000;
+	 *unidade= (numero-*milhar*1000000-*centena*100000-*dezena*10000)/1000;
+	 *decimo=  (numero-*milhar*1000000-*centena*100000-*dezena*10000-*unidade*1000)/100;
+	 *milesimo=(numero-*milhar*1000000-*centena*100000-*dezena*10000-*unidade*1000-*decimo*100)/10;
+	 *dezmilesimo=(numero-*milhar*1000000-*centena*100000-*dezena*10000-*unidade*1000-*decimo*100-*milesimo*10);
+
+	 }
+	 */
+}
+
+void If_PutInt(unsigned int v)
+{
+	Sys_HexBcd(v);
+	//PrtLcdBcdNumber(Zaz[2]);
+	PrtLcdBcdNumber2(Zaz[1]);
+	PrtLcdBcdNumber(Zaz[0]);
+
+}
+void PrtLcdBcdNumber2(char number)
+{
+	//PrtLcdBcdNibble(number,2);
+	//PrtLcdBcdNibble(number,1);
+	PrtLcdBcdNibble(number,0);
+}
+void PrtLcdBcdNumber(char number)
+{
+	PrtLcdBcdNibble(number,1);
+	PrtLcdBcdNibble(number,0);
+}
+
+#endif
+

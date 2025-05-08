@@ -1,0 +1,4 @@
+../Core/Src/udpfunc.c:73:6:udp_echoserver_receive_callback1	32	static
+../Core/Src/udpfunc.c:190:6:udp_send1	40	static
+../Core/Src/udpfunc.c:239:6:udp_config	4	static
+../Core/Src/udpfunc.c:251:6:udp_echoserver_init	24	static

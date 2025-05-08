@@ -1,0 +1,2 @@
+extint.c:48:6:EINT2_Handler	8	static
+extint.c:77:7:EINTInit	0	static

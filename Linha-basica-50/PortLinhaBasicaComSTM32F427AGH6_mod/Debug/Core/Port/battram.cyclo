@@ -1,0 +1,7 @@
+../Core/Port/battram.c:5:6:InitBatteryRam	2
+../Core/Port/battram.c:45:6:ClearBatteryRam	1
+../Core/Port/battram.c:54:6:MoveBatteryRamToFlash	7
+../Core/Port/battram.c:147:6:EraseMMSector	1
+../Core/Port/battram.c:160:6:GravaNaBatteryRAM1	3
+../Core/Port/battram.c:189:6:GravaNaBatteryRAM	25
+../Core/Port/battram.c:566:6:AtualizaLRCBloco2K	2

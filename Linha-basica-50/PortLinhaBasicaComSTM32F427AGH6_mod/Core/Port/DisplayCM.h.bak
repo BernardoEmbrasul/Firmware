@@ -1,0 +1,55 @@
+/*****************************************************************************
+ *   rotinas.h:  Header file for Rotinas.c
+ *
+ *   Copyright(C) 2006, Embrasul Ind. Eletrônica
+ *   All rights reserved.
+ *
+ *   History
+ *   09.10.2006  ver 1.00    Prelimnary version, first Release
+ *
+ ******************************************************************************/
+#ifndef __ROTINAS_H 
+#define __ROTINAS_H
+
+#define OffCur      0x0C
+#define OnDsp       0x0e
+#define ClrDsp      0x01
+#define OffDsp      0x0a
+#define EntryMode   0x06
+#define Config      0x38
+#define CaracteresEspeciais 0x40
+#define ModoNormal 0x80
+#define Step        0x30
+#define OnCur       0x0F
+#if EQUIP== CM_EQUIP
+#define t1Mili      0x21D1
+#define t4Mili      0x8744
+#define t75Micro    0x39A
+#else
+#define t1Mili      0x8000
+#define t4Mili      0x2000
+#define t75Micro    0x1000
+#endif
+
+void PulseE(void);
+void WrLcdChar(unsigned char dataout);
+void WrLcdData(unsigned char dataout);
+void WrLcdCom(unsigned char inst);
+void PrtLcd( char string[],char linha,char coluna);
+void DisplayInit(void);
+void InitLcd(void);
+void ResetLcd(void);
+void PrtLcdBcdNumber(char number);
+void PrtLcdBcdNumber2(char number);
+void PrtLcdBcdNibble(char number ,char nibble);
+void PosCur(char linha,char coluna);
+void Atraso(int atra);
+EXT void GeraSimbolos(void);
+EXT void PrtLcdBcdNibble(char number ,char nibble);
+EXT void If_testeAlarme(void);  
+
+
+#endif /* end __ROTINAS_H */
+/******************************************************************************
+ **                            End Of File
+ ******************************************************************************/

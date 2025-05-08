@@ -1,0 +1,2 @@
+../Core/Port/extint.c:48:6:EINT2_Handler	8	static
+../Core/Port/extint.c:77:7:EINTInit	4	static

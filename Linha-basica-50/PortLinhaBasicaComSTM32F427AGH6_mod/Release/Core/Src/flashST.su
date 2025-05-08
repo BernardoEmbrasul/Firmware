@@ -1,0 +1,13 @@
+flashST.c:34:17:GetSector	0	static
+flashST.c:101:6:FLASH_apaga	8	static
+flashST.c:164:6:FLASH_escreve_16bits	16	static
+flashST.c:178:6:FLASH_escreve_8bits	16	static
+flashST.c:208:14:FLASH_escreve_32bits	16	static
+flashST.c:244:6:FLASH_escreve_string	24	dynamic
+flashST.c:280:6:FLASH_le_16bits	0	static
+flashST.c:298:6:FLASH_le_32bits	0	static
+flashST.c:314:6:FLASH_le_string_0xFF	12	static
+flashST.c:337:6:erase1	8	static
+flashST.c:386:6:get_calib_addr	0	static
+flashST.c:412:6:erase	24	static
+flashST.c:491:15:program	32	static

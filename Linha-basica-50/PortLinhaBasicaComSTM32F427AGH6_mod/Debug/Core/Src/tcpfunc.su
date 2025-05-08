@@ -1,0 +1,7 @@
+../Core/Src/tcpfunc.c:126:6:tcp_send1	32	static
+../Core/Src/tcpfunc.c:182:13:close_conn	16	static
+../Core/Src/tcpfunc.c:192:7:TCPConnected	24	static
+../Core/Src/tcpfunc.c:236:7:tcp_echoserver_receive_callback1	48	static
+../Core/Src/tcpfunc.c:302:14:echo_accept	24	static
+../Core/Src/tcpfunc.c:316:10:get_port	4	static
+../Core/Src/tcpfunc.c:329:6:tcp_echoserver_init	24	static

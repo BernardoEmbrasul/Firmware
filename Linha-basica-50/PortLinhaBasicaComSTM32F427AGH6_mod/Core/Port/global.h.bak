@@ -1,0 +1,1138 @@
+/*****************************************************************************
+ *   config.h:  Header file for global variables and global includes
+ *
+ *   Copyright(C) 2006, Embrasul Ind. Eletr�nica
+ *   All rights reserved.
+ *
+ *   History
+ *   2006.17.04  ver 1.00    Prelimnary version, first Release
+ *
+ ******************************************************************************/
+
+#ifndef __GLOBAL_H__
+#define __GLOBAL_H__
+
+/******************************************************************************
+ **                            All Includes
+ ******************************************************************************/
+//Aqui ser�o incluidas TODOS os .h utilizados no projeto,
+//De forma que, incluindo o global.h estaremos incluindo tudo
+//Aqui ser�o incluidas TODOS os .h utilizados no projeto,
+//De forma que, incluindo o global.h estaremos incluindo tudo
+
+
+#include "linhabasica_port.h"
+#include "config.h"
+#include "adc1.h"
+#include "battram.h"
+#include "interface.h"
+#include "rtc.h"
+#include "flash.h"
+#include "config1.h"
+#include "config.h"
+#include "uespecific.h"
+#include "uart.h"
+#include "wdt.h"
+#include "display.h"
+#include "displayCM.h"
+#include "modbus.h"
+#include <math.h>
+#include <string.h>
+#include "calculos.h"
+#include "calculos1.h"
+#include "extint.h"
+#include "flash.h"
+#include "uart.h"
+#include "principal.h"
+#include "timer.h"
+//#include "ssp.h"
+#if EQUIP==CM_EQUIP
+#include "calculosCM.h"
+#include "Sistema.h"
+#endif
+
+
+EXT void  Testes111();
+extern U8 own_hw_adr[];
+extern U8 lhost_name[];
+extern LOCALM localm[];
+/******************************************************************************
+ **                            Defines PINS
+ ******************************************************************************/
+
+/******************************************************************************
+ **                            Defines PINS
+ ******************************************************************************/
+
+/////////////////////////////////////////////////////
+//					PORTA P0
+/////////////////////////////////////////////////////
+#define	TXD0_PIN  		0x00000001 	//P0.0
+#define	RXD0_PIN  		0x00000002 	//P0.1
+#define	MED_FREQ_PIN 	0x00000004	//P0.2
+#if EQUIP!=CM_EQUIP
+#define	DPY_RST_PIN 	0x00010000	//P0.16
+#endif
+//#define	E2P_CLK_PIN 	0x00000010	//P0.4
+#define	E2P_DO_PIN 		0x00000020	//P0.5
+#define	E2P_DI_PIN 		0x00000040	//P0.6
+#define	E2P_CS_PIN 		0x00000080	//P0.7
+
+#ifdef MD4040
+#define	DPY_CLK_PIN     0x00080000	//P0.19
+#define	DPY_ENA_PIN 	0x00100000	//P0.20
+#endif
+#ifdef MD4000
+#define	DPY_CLK_PIN     0x00001000	//P0.12
+#define	DPY_ENA_PIN 	0x00002000	//P0.13
+#endif
+
+#define	REL1_CS	 		0x00040000	//P0.18
+#define	REL2_CS	 		0x00010000	//P0.16
+#define	REL_OE	 		0x00020000 	//P0.17
+#define BARRAMENTO_EM_P1 	OFF //seleciona porta 1 ou 0 .
+#define RS_EM_P1 			OFF//seleciona porta 1 ou 0
+#define CS_EM_P1 			OFF //seleciona porta 1 ou 0
+#define	REL1_CS_EM_P1	 	OFF
+#define	REL2_CS_EM_P1	 	OFF
+#define	REL_OE_EM_P1	 	OFF
+#define	CS	 			0x00080000 	//P0.19
+#define	RS	 			0x00100000 	//P0.20
+#define BARRAMENTO    		0x000000FF 	//Localizacao do barramento de dados, da porta 16 ateh a 23
+#define INICIO_BARRAMENTO	0  		// Localiza o inicio do barramento de dados
+
+
+
+
+
+#define	BUZZER_PIN 		0x00000200 	//P0.9
+#if EQUIP!=CM_EQUIP
+#define	WR7SEG_PIN	 	0x00040000	//P0.18
+#endif
+
+#define	HABSER_PIN	 	0x00000010	//P0.4
+//	#define	AD_TCA_PIN	 	0x00002000	//P0.13
+#define	ISP_PIN		 	0x00004000	//P0.14
+#if MD4060 == 1
+	#define	WDI_PIN	 		0x00000800	//P2.11
+#else
+	#define	WDI_PIN	 		0x00008000	//P0.15
+#endif
+//	#define	ETH_INT_PIN	 	0x00010000	//P0.16
+#define	TCL1_PIN	 	0x00020000	//P0.17
+//	#define	TCL2_PIN	 	0x00040000	//P0.18
+//	#define	TCL3_PIN		0x00080000	//P0.19
+//	#define	PWD_PIN	 	 	0x00100000	//P0.20
+#define	AD_TCB_PIN	 	0x00200000	//P0.21
+#define	AD_TCC_PIN		0x00400000  //P0.22
+#define	VAGO1_PIN	 	0x00800000	//P0.23
+//P0.24				    0x01000000
+#define	ETH_AEN_PIN	 	0x02000000	//P0.25
+//P0.26				    0x04000000
+//P0.27				    0x08000000
+#define	AD_TPA_PIN		0x10000000	//P0.28
+#define	AD_TPB_PIN 		0x20000000	//P0.29
+#define	AD_TPC_PIN		0x40000000	//P0.30
+#define	VAGO2_PIN	 	0x80000000	//0.31
+#if EQUIP!=CM_EQUIP
+#ifndef PROTOTIPO_TR
+#define	TECLA_RESET_IP	0x00000020 	//P0.5
+#else
+#define	TECLA_RESET_IP	0x00040000 	//P0.18
+#endif
+#define	LED_ONOFF_PIN	0x00000040 	//P0.6
+#define	LED_TX	0x00000080 	//P0.7
+#define	LED_RX	0x00000100 	//P0.8
+#endif
+/////////////////////////////////////////////////////
+//					PORTA P1
+/////////////////////////////////////////////////////
+//P1.0
+//P1.1
+//P1.2
+//P1.3
+//P1.4
+//P1.5
+//P1.6
+//P1.7
+//P1.8
+//P1.9
+//P1.10
+//P1.11
+//P1.12
+//P1.13
+//P1.14
+//P1.15
+#define	P1_16_PIN	 	0x00010000 	//P1.16
+#define	P1_17_PIN	 	0x00020000 	//P1.17
+#define	P1_18_PIN	 	0x00040000 	//P1.18
+#define	P1_19_PIN	 	0x00080000 	//P1.19
+#define	P1_20_PIN	 	0x00100000 	//P1.20
+#define	P1_21_PIN	 	0x00200000 	//P1.21
+#define	P1_22_PIN	 	0x00400000 	//P1.22
+#define	P1_23_PIN	 	0x00800000 	//P1.23
+#define	A0_PIN	 		0x01000000 	//P1.24
+#define	A1_PIN	 		0x02000000 	//P1.25
+#define	A2_PIN	 		0x04000000 	//P1.26
+#define	A3_PIN	 		0x08000000 	//P1.27
+#define	A4_PIN	 		0x10000000 	//P1.28
+#define	ETH_WR_PIN 		0x20000000	//P1.29
+#define	ETH_RD_PIN 		0x40000000	//P1.30
+#define	ETH_RST_PIN		0x80000000	//P1.31
+
+//384  //cm--->384
+#define	TAM_BUFFER_CIRCULAR 1536
+//#define	TAM_BUFFER_CIRCULAR 1
+//256////cm-->256	  //768=acciclos de 60hz
+#define	TAM_BUFFER 768
+
+#define COM_PONTO 0x00000080//0x00800000  //referentes ao display
+#define SEM_PONTO 0x00000000  //referentes ao display
+
+
+#define COMBUFSIZE	1500
+#define BUFSIZE		64//20
+//Paridade,Stops
+#define STOPBITS1		0x0
+#define STOPBITS2		0x4
+#define SEM_PARIDADE 	0
+#define PARIDADE_IMPAR	1
+#define PARIDADE_PAR	2
+
+#define FUNCAO_SLAVE_ID 	0x11
+#define FUNCAO_READ_HOLD 	0x3
+#define FUNCAO_PRESET_MULT 	0x10
+#define FUNCAO_PRESET_SINGLE  0x06
+
+#define SEM_ERRO		 		0x00
+#define ILLEGAL_FUNCTION 		0x01
+#define ILLEGAL_DATA_ADDRESS 	0x02
+#define ILLEGAL_DATA_VALUE  	0x03
+#define SLAVE_DEVICE_FAILURE  	0x04 //Um erro aconteceu enquanto o equip tentava obedecer ao mestre
+
+//relacionados a Emac
+#define TX_PACKET_SIZE		114
+#define ARP_OPCODE              20
+#define ARP_DIPADDR             38
+
+
+
+typedef struct
+{
+	unsigned short Combinacao;
+	unsigned short KVAr;
+} StrucTabela;
+
+typedef struct
+{
+	unsigned short StatusAtual;
+	unsigned short Valor;
+	unsigned short StatusAlvo;
+} StrucBancos;
+
+typedef struct
+{
+	unsigned char leitura;
+	unsigned char prog;
+} Structmenu;
+
+typedef struct
+{
+	long int tempo;
+	short tipo;
+}
+StrucTabelaTempo;
+
+
+
+
+EXT unsigned char *AT ;
+EXT unsigned char *ATI ;
+EXT unsigned char *ATGMI  ;
+EXT unsigned char *ATGMM ;
+EXT unsigned char *ATGMR ;
+
+EXT unsigned char *ATCREG ;
+EXT unsigned char *ATQICSGP ;
+EXT unsigned char *ATQIACT  ;
+EXT unsigned char *ATQIACTq ;
+EXT unsigned char *ATQIOPEN  ;
+EXT unsigned char *ATQISEND  ;
+EXT unsigned char *TEST_MESSAGE ;
+EXT unsigned char *ATQIRD ;
+EXT unsigned char *ATQIDEACT ;
+
+EXT unsigned char *ATCSQ ;
+
+EXT unsigned char *ATSGACT ;
+EXT unsigned char *ATSGACTCFG ;
+
+
+
+
+/******************************************************************************
+ **                            Global Constants
+ ******************************************************************************/
+enum e_msg_socket
+{
+	THRU_NONE,
+	THRU_UDP, THRU_TCP
+};
+extern enum e_msg_socket modbus_msg_protocol;
+
+EXT BYTE BufferMovimentacao[1024];
+EXT BYTE bloco_dados_index;
+EXT void pisca1(void);
+EXT void pisca2(void);
+EXT void pisca3(void);
+EXT char LinearizaSoTP;
+
+/* Buffers de Tens�o e Corrente */
+EXT short Ua[TAM_BUFFER_CIRCULAR+10];
+EXT short Ub[TAM_BUFFER_CIRCULAR+10];
+EXT short Uc[TAM_BUFFER_CIRCULAR+10];
+EXT short Ia[TAM_BUFFER_CIRCULAR+10];
+EXT short Ib[TAM_BUFFER_CIRCULAR+10];
+EXT short Ic[TAM_BUFFER_CIRCULAR+10];
+
+/* Ponteiros para os Buffers de Tens�o e de Corrente */
+EXT short * pUa;
+EXT short * pUb;
+EXT short * pUc;
+EXT short * pIa;
+EXT short * pIb;
+EXT short * pIc;
+
+/*CALCULOS*/
+EXT short semuso1;
+EXT short semuso2;
+EXT short semuso3;
+EXT DWORD HabCalculos;
+EXT char HabCapator;
+EXT unsigned char ProximoCanal;
+
+EXT float PAat;	  //
+EXT float PBat;	  //declara��o das matrizes de potencia ativa
+EXT float PCat;	  //
+
+EXT float PAap;		  //
+EXT float PBap;		  //potencias aparentes
+EXT float PCap;		  //
+
+
+EXT short *pUAparaCalculo;		  //
+EXT short *pUBparaCalculo;		  //ponteiros para tens�o
+EXT short *pUCparaCalculo;		  //
+
+EXT short *pIAparaCalculo;		  //
+EXT short *pIBparaCalculo;		  //ponteiros para corrente
+EXT short *pICparaCalculo;		  //
+
+EXT int *pPAat;		  //
+EXT int *pPBat;		  //ponteiros para potencia ativa
+EXT int *pPCat;		  //
+
+
+EXT float SinalQA;
+EXT float SinalQB;
+EXT float SinalQC;
+EXT float SinalQT;
+
+EXT char estouvivo;
+EXT char estouvivo1;
+EXT char FlagEstouro;
+
+EXT DWORD Cnt1min;
+EXT DWORD NumeroDeIntervalos1minParaProximoRegistro;
+
+
+EXT short UtilizaPolinomios;
+
+
+EXT short LeituraConcessionariaJaRealizadaEsteMes;
+
+#define INICIO_BLOCO 	(long int)&EnergGerA
+//define FIM_BLOCO 		(long int)&MaxPotReatReserv
+#define FIM_BLOCO 		(long int)&ultima_variavel
+
+#define DIFERENCA (long int)FIM_BLOCO-(long int)INICIO_BLOCO
+
+
+
+
+
+//fim do buffer de comunicacao
+
+EXT RTCTime rtc_horario_volta;
+EXT RTCTime rtc_horario_queda;
+EXT RTCTime reservadito;
+EXT StrucTabelaTempo tabelinha[13];
+EXT char BateriaMorta;
+
+EXT float FreqAt1,FreqAt2,FreqAcumul;
+EXT char  EtapaMedirFreq;
+EXT short FlagHabCalculoFreq;
+EXT short ContadorTimer0forFreq;
+
+
+
+
+////
+//valores de 12 ciclos
+EXT float UrmsAacc,UrmsBacc,UrmsCacc;
+EXT float UrmsA_acc,UrmsB_acc ,UrmsC_acc ;
+EXT float IrmsAacc,IrmsBacc,IrmsCacc;
+EXT float IrmsA_acc,IrmsB_acc,IrmsC_acc;
+EXT float PotAtivAacc,PotAtivBacc,PotAtivCacc,PotAtivTacc;
+EXT float PotReatAacc,PotReatBacc,PotReatCacc,PotReatTacc;
+EXT float EnergGerAacc,EnergGerBacc,EnergGerCacc,EnergGerTacc;
+EXT float ConsumoAacc,ConsumoBacc,ConsumoCacc,ConsumoTacc;
+EXT float EnergCapAacc,EnergCapBacc,EnergCapCacc,EnergCapTacc;
+EXT float EnergIndAacc,EnergIndBacc,EnergIndCacc,EnergIndTacc;
+EXT float DhtUAacc,DhtUBacc,DhtUCacc;
+EXT float DhtIAacc,DhtIBacc,DhtICacc;
+EXT float FreqAacc,FreqBacc,FreqCacc;
+
+EXT unsigned long long ConsumoTotalAcc;
+
+///
+EXT BYTE CalibraAgora;
+EXT BYTE CalibrarTensao;
+EXT BYTE CalibrarCorrente;
+EXT BYTE TipodeLeituraModbus;
+EXT short Namostras;
+EXT char ContadorIntegrados;
+EXT char AtualizaDisplay;
+EXT short * proximoInicioUa;
+EXT short * proximoInicioUb;
+EXT short * proximoInicioUc;
+EXT short * proximoInicioIa;
+EXT short * proximoInicioIb;
+EXT short * proximoInicioIc;
+
+/*UART*/
+EXT DWORD UART0Count;
+EXT DWORD UART0Status;
+EXT BYTE  UART0Buffer[COMBUFSIZE];
+EXT BYTE  UART0TxEmpty;
+EXT BYTE  UART0Buffer[];
+
+/*WatchDog*/
+//EXT DWORD wdt_counter;
+
+/*Display*/
+EXT  BYTE  CurrentDpy;
+EXT  DWORD DisplayChar[12];
+EXT short PiscarCount;
+EXT BYTE DpyPiscante;
+EXT BYTE PrimeiroDpyPiscante;
+EXT BYTE UltimoDpyPiscante;
+
+
+/*timer*/
+EXT DWORD timer_counter0;
+EXT DWORD timer_counter1;
+
+/*AD*/
+//EXT DWORD ADC0Value[ADC_NUM];
+EXT DWORD ADC1Value[ADC_NUM];
+//EXT DWORD ADC0IntDone;
+EXT DWORD ADC1IntDone;
+
+/*RTC*/
+EXT DWORD alarm_on;
+
+/*Main*/
+//EXT BYTE BufferComunic[2*TAM_BUFFER_CIRCULAR];
+
+/*Comunica��o Modbus*/
+EXT BOOL HabResponder;
+EXT BOOL HabResponderPR4000;
+/*outros- PR4000*/
+EXT BYTE eCOMIGOeCOMTODOS;
+EXT BYTE FlagChegouBroadCast;
+EXT BYTE CRCHi;
+EXT BYTE CRCLo;
+EXT short OldCrc;
+EXT BOOL FlagChegouEnderecoMODBUS;
+EXT BOOL FlagChegouEnderecoMODBUSMestre;
+EXT BOOL FlagHouveSilencioMODBUS;
+EXT BOOL FlagFinalizaRecepcaoDeMensagemMODBUS;
+
+
+
+EXT uint16_t ContSilencioMODBUS;
+EXT BYTE ExceptionCodeMODBUS;
+
+/*RTC*/
+EXT RTCTime local_time, alarm_time, current_time;
+
+/*Interface*/
+EXT char StrBanner[40];
+EXT short BannerCount;
+EXT BYTE BannerCharIndex;
+EXT BYTE BannerSize;
+EXT BYTE BannerPosition;
+EXT BOOL FlagHabBanner;
+
+
+EXT BYTE teclaAtual;
+EXT BYTE ultimaTeclaExecutada;
+EXT BYTE funcaoTeclas[17];
+EXT BYTE telaAnterior;
+EXT BYTE telaAtual;
+EXT BYTE ultimaFuncaoChamada;
+EXT BYTE ultimaTelaExibida;
+EXT BYTE tela1,tela2;
+EXT DWORD LatchLED_1,LatchLED_2,LatchLED_3;
+
+
+/*OUTROS*/
+EXT WORD Hab_LeituraMedios;
+EXT short FrequenciaNominal;
+
+
+/*De debug*/
+EXT BYTE Hab_envia;
+
+/*Parametros de Programacao*/
+
+
+
+//EXT BYTE Reservado3;
+
+EXT BYTE LeituraConcessionariaSolicitada;
+EXT BYTE CiclarTelas;
+EXT BYTE BloqueioTeclado;
+//EXT BYTE ReleLigado;
+
+EXT BYTE dummy1;
+EXT BYTE dummy2;
+EXT BYTE dummy3;
+EXT short relacaoTPpri_temp;
+EXT short relacaoTPsec_temp;
+EXT short relacaoTPfat_temp;
+EXT short relacaoTCpri_temp;
+EXT short relacaoTCsec_temp;
+EXT short relacaoTCfat_temp;
+EXT BYTE MeuEnderecoMODBUS_temp;
+EXT BYTE BaudRate_temp;
+EXT BYTE ParidadeStops_temp;
+EXT BYTE dummy4;
+EXT BYTE dummy5;
+EXT BYTE dummy6;
+EXT BYTE IPOcteto1_temp;
+EXT BYTE IPOcteto2_temp;
+EXT BYTE IPOcteto3_temp;
+EXT BYTE IPOcteto4_temp;
+EXT BYTE MKOcteto1_temp;
+EXT BYTE MKOcteto2_temp;
+EXT BYTE MKOcteto3_temp;
+EXT BYTE MKOcteto4_temp;
+EXT BYTE GWOcteto1_temp;
+EXT BYTE GWOcteto2_temp;
+EXT BYTE GWOcteto3_temp;
+EXT BYTE GWOcteto4_temp;
+EXT short NroPorta_temp;
+EXT short NroPorta_temp2;
+
+EXT char tempUni;
+EXT char tempDez;
+EXT char tempCen;
+EXT char tempMil;
+
+EXT char currentAlgarismo;
+EXT char zeraConsumos;
+EXT char SairGravando;
+
+
+extern unsigned char const versao_str[3];
+EXT unsigned char JaRegistrouNoIntervalode15Min;
+EXT unsigned char FLAG_HORACHEIA;
+//EXT unsigned char FLAG_MESMO_INTERVALO_15MIN;
+//EXT unsigned char FLAG_FORA_DO_INTEVALO_DE_15_MIN_NO_MESMO_DIA;
+//EXT unsigned char FLAG_MESMO_INTERVALO_15MIN_OU_INTERVALO_15MIN_SEGUINTE;
+EXT unsigned char ProximoIniciodeIntervalo;
+
+EXT unsigned char ProximoIniciodeIntervalo1Min;
+EXT unsigned char JaRegistrouNoIntervalode1Min;
+
+
+
+
+
+
+
+
+
+EXT float nPontosMedia;
+
+
+EXT short TipoDeHorario;
+EXT short DiaDeHoje;
+EXT short MesDeHoje;
+
+
+EXT float  ConsumoAnow,EnergGerAnow, EnergIndAnow,  EnergCapAnow;
+EXT float  ConsumoBnow,EnergGerBnow, EnergIndBnow,  EnergCapBnow;
+EXT float  ConsumoCnow,EnergGerCnow, EnergIndCnow,  EnergCapCnow;
+EXT float  ConsumoTnow,EnergGerTnow, EnergIndTnow,  EnergCapTnow;
+
+
+
+EXT float gui;
+
+EXT short estou_no_modo_de_programacao;
+
+EXT  float polinomioModuloIa[4];
+EXT  float polinomioModuloIb[4];
+EXT  float polinomioModuloIc[4];
+
+
+//emac
+EXT BYTE *rxptr;
+EXT BYTE *txptr;
+EXT short enviarpacote;
+EXT volatile DWORD Duplex;
+EXT volatile DWORD Speed;
+EXT volatile DWORD RXOverrunCount ;
+EXT volatile DWORD RXErrorCount ;
+EXT volatile DWORD TXUnderrunCount;
+EXT volatile DWORD TXErrorCount ;
+EXT volatile DWORD RxFinishedCount ;
+EXT volatile DWORD TxFinishedCount;
+EXT volatile DWORD TxDoneCount;
+EXT volatile DWORD RxDoneCount;
+EXT volatile DWORD CurrentRxPtr ;
+EXT volatile DWORD ReceiveLength;
+EXT volatile DWORD PacketReceived ;
+EXT volatile DWORD PacketUDPtoSend ;
+EXT volatile DWORD CaboEthOK;
+
+EXT short AtivacaoRele1;
+EXT short AtivacaoRele2;
+EXT short AtivacaoRele3;
+EXT float LimiarRele1		;
+EXT float LimiarRele2		;
+EXT float LimiarRele3		;
+EXT short LimiarTempoRele1	;
+EXT short LimiarTempoRele2	;
+EXT short LimiarTempoRele3	;
+EXT unsigned char Zaz[5];
+
+EXT float DhtUAmedia;
+EXT float DhtIAmedia;
+EXT float DhtUBmedia;
+EXT float DhtIBmedia;
+EXT float DhtUCmedia;
+EXT float DhtICmedia;
+EXT float DhtUAtemp;
+EXT float DhtIAtemp;
+EXT float DhtUBtemp;
+EXT float DhtIBtemp;
+EXT float DhtUCtemp;
+EXT float DhtICtemp;
+EXT int contadht;
+
+
+EXT float MMNpontosGrandezas; //numero de pontos acumulados
+
+#if EQUIP==CM_EQUIP
+//EXT  RegistroDeAlteracoesConfig_ RegistroDeAlteracoesConfig;
+//EXT  RegistroDeAlteracoesReles_  RegistroDeAlteracoesReles ;
+//EXT  RegistroDeQuedas_e_Voltas_  RegistroDeQuedas_e_Voltas ;
+//EXT  RegistroDeAlteracoesFlash_	 RegistroDeAlteracoesFlash ;
+//EXT  RegistroNormalSemRelogio_	 RegistroNormalSemRelogio  ;
+//EXT  RegistroNormalComRelogio_	 RegistroNormalComRelogio  ;
+//EXT  RegistroDeLeituraFlash_	 RegistroDeLeituraFlash;
+
+
+
+//variaveis do cm
+EXT short contador2segundos;
+EXT BYTE controleManualHabilitado;
+EXT BYTE zerar_consumo_cm;
+EXT const unsigned short  mask[17];
+EXT short rele_alarme_ativado;
+
+/*Comunica��o Modbus*/
+EXT BOOL HabResponder;
+EXT BOOL HabResponderPR4000;
+/*outros- PR4000*/
+EXT BYTE eCOMIGOeCOMTODOS;
+EXT BYTE FlagChegouBroadCast;
+
+/*Relacionados Ao CM4020T*/
+EXT unsigned short KVAr_estagio[14];
+EXT unsigned char Indice;
+EXT unsigned char FLAG_CORRIGINDO;
+EXT unsigned char TendenciaCalculada;
+EXT unsigned char FLAG_MUDEI_FUNCAO33;
+EXT unsigned char FLAG_PODE_INTEGRAR;
+union senh0 {unsigned short senha_i; char senha_c[2];};
+EXT union senh0 senha;
+EXT short unsigned senhalocal;
+union pair1 {unsigned short s_int; unsigned char s_char[2];};
+EXT union pair1 SenhaMestre;
+
+EXT unsigned char latch1atual;
+EXT unsigned char latch2atual;
+
+union lat {unsigned short i; char c[2];};
+EXT union lat latchatual;
+
+EXT unsigned char nPontos;
+EXT StrucBancos Bancos;
+EXT unsigned short StatusAtual1;
+EXT short ETestatus;
+EXT unsigned char StatusAlarme;
+EXT unsigned char analizafase; //come�a pela fase A;
+
+EXT unsigned char FLAG_HAB_CONTADOR_FP_FORA;
+EXT unsigned char FLAG_HAB_CONTADOR_DHT_FORA;
+EXT unsigned char FLAG_HAB_CONTADOR_V_FORA;
+EXT unsigned char FLAG_HAB_CONTADOR_I_FORA;
+EXT unsigned char FLAG_HAB_CONTADOR_AL_FP_FORA;
+
+EXT unsigned char FLAG_FP_FORA;
+EXT unsigned char FLAG_DHT_FORA;
+EXT unsigned char FLAG_V_FORA;
+EXT unsigned char FLAG_I_FORA;
+EXT unsigned char FLAG_AL_FP_FORA;
+
+
+EXT unsigned char  FLAG_BAUDRATEOK;
+EXT unsigned char  FLAG_ALTEREI_KVAR;
+EXT unsigned char  FLAG_FP_INST_FORA;
+EXT unsigned char  FLAG_FP_INST_FORA_AL;
+EXT unsigned char  FLAG_FP_MEDIO_FORA;
+EXT unsigned char  FLAG_FP_MEDIO_FORA_AL;
+
+EXT unsigned char  FLAG_AL_ATIV_DHT_FORA;
+EXT unsigned char  FLAG_AL_ATIV_SUBSOB_V;
+EXT unsigned char  FLAG_AL_ATIV_SEM_CORR;
+EXT unsigned char  FLAG_AL_ATIV_FP_FORA ;
+
+EXT unsigned char FLAG_RESPONDER;
+EXT unsigned char FLAG_MODO_ACCIONA_TODOS;
+EXT unsigned char FLAG_BLOQUEIOCAPACITIVO;
+EXT unsigned char FLAG_DESLIGATODOS;
+EXT unsigned char FLAG_MODO_DE_FUNCIONAMENTO;
+#ifdef HABsangrado
+EXT unsigned char FLAG_MODO_DELTA_SANGRADO;
+#endif
+
+
+EXT unsigned char  FLAG_UM_TD_TRANSCORRIDO;
+EXT unsigned char  ALTERACAO_MANUAL_FINALIZADA;
+
+EXT unsigned char  FLAG_LIGOU_RECENTEMENTE;
+EXT unsigned char  FLAG_TC_INVERTIDO;
+EXT unsigned char  FLAG_TCA_INVERTIDO;
+EXT unsigned char  FLAG_TCB_INVERTIDO;
+EXT unsigned char  FLAG_TCC_INVERTIDO;
+EXT unsigned char  FLAG_PROG_F32;
+EXT unsigned char  FLAG_SINAL_A;
+EXT unsigned char  FLAG_SINAL_B;
+EXT unsigned char  FLAG_SINAL_C;
+EXT unsigned char  FLAG_HORARIO_SEM_CONTROLE;
+EXT unsigned char  FLAG_GERADOR;
+
+EXT unsigned char senhaOK;
+
+EXT Structmenu menu_atual;
+EXT unsigned char modoprog;
+EXT unsigned char programando;
+EXT unsigned char OPERANDO_SAIDAS;
+
+EXT short BancosIguais;
+EXT short ConfiguracaoBancosIguais;
+EXT char NumeroBancosIguais;
+EXT short ncombinacoes;
+EXT char Comando;
+EXT unsigned char PiscarSimboloAlarme;
+EXT char naodapracorregir;
+EXT char naodapracorregirJaTentei;
+EXT unsigned char ponteiroDeONs;
+EXT unsigned char ponteiroDeOFFs;
+EXT float Qn1;
+EXT float Qn2;
+EXT unsigned short ZeroKVAr;
+EXT unsigned char StatusFuncaoFinal[50];
+EXT unsigned char StatusFuncao[50];
+EXT unsigned char StatusDaFuncaoA,StatusDaFuncaoB;
+union tptc0 {unsigned short tptc_i; char tptc_c[2];};
+EXT  union tptc0 tptc;
+
+//EXT  unsigned short PrimarioTP, SecundarioTP;
+//EXT  unsigned short PrimarioTC, SecundarioTC;
+EXT  unsigned short PrimarioLocal,SecundarioLocal ;
+
+
+EXT  char FLAG_CF_al_supCAPACITIVO;
+EXT  char FLAG_CF_al_infCAPACITIVO;
+EXT  char FLAG_CF_supCAPACITIVO;
+EXT  char FLAG_CF_infCAPACITIVO;
+EXT  char FLAG_Ct_CAPACITIVO;
+
+
+//BUFFER DE DADOS DO CM4020 VELHO....
+//EXT float Q_controlador; //KVAr que o controlador introduz no sistema
+EXT unsigned char modo_de_operacao_AL_CORR;
+EXT unsigned char modo_de_operacao_AL_TENS;
+EXT unsigned char modo_de_operacao_AL_DHT;
+EXT unsigned char StatusAlarme;
+EXT unsigned char PiscarSimboloAlarme;
+//valores calculados em funcao da janela; sao os Q desejados no sistema
+EXT float Q_inf;
+EXT float Q_sup;
+EXT int CONTPOWERDOWN;
+EXT unsigned char StatusFuncaoFinal[50];
+EXT unsigned char StatusFuncao[50];
+EXT unsigned short KVAr_estagio[14];
+EXT float Qacumulada;
+EXT float Pacumulada;
+EXT unsigned char FLAG_CORRIGINDO;
+EXT unsigned char TendenciaCalculada;
+EXT unsigned short Tdisparo;
+EXT unsigned char TendCmais;
+EXT unsigned char TendCmenos;
+
+EXT StrucTabela tabela[4097];
+EXT unsigned short VetorBancosIguais[13];
+EXT unsigned short contadorSeg;
+EXT unsigned int contadorFPfora;
+EXT unsigned int contadorALFPfora;
+EXT unsigned int contadorDHTfora;
+EXT unsigned int contadorVfora;
+EXT unsigned int contadorIfora;
+EXT unsigned short CombinacaoOtima;
+EXT unsigned char  SemCorr;
+
+
+
+#if EQUIP ==CM_EQUIP
+EXT float ConstanteUsuario1;
+EXT float ConstanteUsuario2;
+EXT float ConstanteUsuario3;
+EXT float ConstanteUsuario4;
+EXT float ConstanteUsuario5;
+EXT float ConstanteUsuario6;
+#endif
+
+
+/*apartir daqui as vari�veis de parametriza��o do CM4020T*/
+//EXT float Td;
+//EXT float Talarme;
+//EXT float CF_inf;
+//EXT float CF_sup;
+//EXT float CF_al_inf;
+//EXT float CF_al_sup;
+//EXT float Vlim_inf;
+//EXT float Vlim_sup;
+//EXT float DHTVlim;
+//EXT float estagio1;
+//EXT float estagio2;
+//EXT float estagio3;
+//EXT float estagio4;
+//EXT float estagio5;
+//EXT float estagio6;
+//EXT float estagio7;
+//EXT float estagio8;
+//EXT float estagio9;
+//EXT float estagio10;
+//EXT float estagio11;
+//EXT float estagio12;
+
+//EXT short StatusDosReles;
+/* somente leitura
+   x  x  x  x - 1FF(12 reles)
+   |  |  |	 |
+   |  |  |	 |
+   |  |  |	 |_________________________Alarme DHTv
+   |  |  |____________________________Alarme I
+   |_______________________________Alarme V
+   |__________________________________Alarme fp
+ */
+//EXT short ParametrizacaoCM;
+/*
+									11 10  9 8	7  6  5  4	3  2  1	 0
+									x  x  x	 x  x  x  x  x  x  x  x  x
+									|  |  |	 |  |  |  |  |  |  |  |  |
+									|  |  |	 |  |  |  |  |  |  |  |  |_BloQCapativo    			 (ON,OFF)
+									|  |  |	 |  |  |  |  | 	|  |  |____ModoAcionaTodos 			 (ON,OFF)
+									|  |  |	 |  |  |  |  | 	|  |_______Alarme Falta Corrente 	 (ON,OFF)
+									|  |  |	 |  |  |  |  | 	|__________Modo Al. Corrente, Desliga(ON,OFF)
+									|  |  |	 |  |  |  |  |_____________Alarme Falta Corrente 	 (ON,OFF)
+									|  |  |	 |  |  |  |________________Modo Al. Corrente, Desliga(ON,OFF)
+									|  |  |	 |  |  |___________________Alarme Falta Tens�o  	 (ON,OFF)
+									|  |  |	 |  |______________________Modo Al. Tens�o,Desliga   (ON,OFF)
+									|  |  |	 |_________________________Alarme DHTv			  	 (ON,OFF)
+									|  |  |____________________________Modo Al. DHTv,Desliga	 (ON,OFF)
+									|  |_______________________________Tipo de Ligacao LSB
+									|__________________________________Tipo de Ligacao MSB
+
+ */
+
+/**************************************************************/
+//EXT short HorarioSemAtuarInicio ; //registro MODBUS:418
+//EXT short HorarioSemAtuarFim 	; //registro MODBUS:419
+#endif
+
+EXT  unsigned int statuscaps1;
+EXT  unsigned int statuscaps2;
+
+EXT float StatusDosRelesToMM;
+EXT float MMTemp ;
+EXT float MMTemp2 ;
+
+
+EXT  RegistroMD4040TI_			 RegistroMD4040TI_3G;
+EXT  RegistroDeAlteracoesConfig_ RegistroDeAlteracoesConfig;
+EXT  RegistroDeAlteracoesReles_  RegistroDeAlteracoesReles ;
+EXT  RegistroDeQuedas_e_Voltas_  RegistroDeQuedas_e_Voltas ;
+EXT  RegistroDeAlteracoesFlash_	 RegistroDeAlteracoesFlash ;
+EXT  RegistroNormalSemRelogio_	 RegistroNormalSemRelogio  ;
+EXT  RegistroNormalComRelogio_	 RegistroNormalComRelogio  ;
+#if (USAR_REGISTRO_SHORT==SIM)
+EXT  RegistroShortSemRelogio_	 RegistroShortSemRelogio  ;
+EXT  RegistroShortComRelogio_	 RegistroShortComRelogio  ;
+#endif
+EXT  RegistroDeLeituraFlash_	 RegistroDeLeituraFlash;
+
+EXT  float MMUaAcc;	 //Ua
+EXT  float MMUbAcc;	 //Ub
+EXT  float MMUcAcc;	 //Uc
+EXT  float MMIaAcc;	 //Ia
+EXT  float MMIbAcc;	 //Ib
+EXT  float MMIcAcc;	 //Ic
+EXT   float MMDemPAcc;	 //Demanda 3F  P
+EXT  float MMDemQAcc;	 //Demanda 3F  R
+EXT  float MMFp3Acc ;	 //FP		   3F
+EXT  float MMNpontosGrandezas; //numero de pontos acumulados
+
+EXT U8 srv_ip[4];
+EXT U8 FlagWDIDentroDoTimer;
+EXT BOOL OnOffPulseRate;
+EXT short numeroSerieHexa;
+#if EQUIP!=CM_EQUIP
+EXT BYTE SoConsideraFundamental;
+EXT BYTE flag1pulso;
+EXT BYTE flag2pulso;
+	#if CP40==1
+	EXT BYTE flag3pulso;
+	EXT BYTE flag4pulso;
+	//EXT float pulso3;
+	//EXT float pulso4;
+	#endif
+#endif
+
+EXT BYTE ns0;
+EXT BYTE ns1;
+EXT BYTE ns2;
+EXT BYTE ns3;
+EXT BYTE ns4;
+EXT BYTE ns5;
+EXT BYTE ns6;
+EXT BYTE ns7;
+
+EXT BYTE EquipVirgem;
+
+EXT BYTE modelo_3g;
+EXT BYTE como_remota_GDE;
+
+
+#if (DEBUG_SEM_BLOCO2K_EM_BATTRAM==SIM)
+EXT BaseBattRam  RegistroCabecalho2K;
+#endif
+
+
+
+EXT const unsigned short  mask[17];
+
+EXT DWORD const baudrates[8];
+EXT BYTE BufferMovimentacao[1024];//  __at (0x40001000) ;/* Buffer Temporario para movimentacao de dados na Flash*/
+
+EXT unsigned long int const InicioSetores[27];
+
+EXT unsigned long int const FimSetores[27];
+
+EXT float DummyForIAPreservSpace[4];//32bytes reservados para IAP!
+EXT unsigned int CounterMASK[16];
+EXT float const polinomioMIa[4];
+EXT float const polinomioMIb[4];
+EXT float const polinomioMIc[4];
+
+EXT char TAB_SIL_CARGA[8];
+
+
+EXT   float nPontosMedia;
+EXT   float UrmsA_;
+EXT   float UrmsB_;
+EXT   float UrmsC_;
+EXT   float IrmsA_;
+EXT   float IrmsB_;
+EXT   float IrmsC_;
+EXT   float UmedioA ;
+EXT   float UmedioB ;
+EXT   float UmedioC ;
+EXT   float ImedioA ;
+EXT   float ImedioB ;
+EXT   float ImedioC ;
+#if  EQUIP!=CM_EQUIP
+EXT   BYTE flagpulso1;
+#endif
+
+/*UART*/
+EXT DWORD UART0Count;
+EXT DWORD UART0Status;
+EXT BYTE  UART0Buffer[COMBUFSIZE];
+EXT BYTE  UART0TxEmpty;
+EXT BYTE  UART0Buffer[];
+EXT BYTE UART0BufferQuectel[COMBUFSIZE];
+EXT BYTE UART0CountQuectel;
+
+EXT DWORD UART1Count;
+EXT DWORD UART1Status;
+EXT BYTE  UART1Buffer[COMBUFSIZE];
+EXT BYTE  UART1TxEmpty;
+//EXT BYTE  UART1Buffer[];
+EXT BYTE UART1BufferQuectel[COMBUFSIZE];
+EXT BYTE UART1CountQuectel;
+EXT BYTE UART1BufferQuectelReady;
+
+EXT BYTE UART1BufferIP[16];
+
+EXT short CountSilenceTime;
+EXT BYTE  silence;
+EXT float gsm_debug;
+EXT float service_debug;
+EXT char gsm_udp_connection_established;
+
+EXT BYTE gsm_ip_is_ready;
+
+EXT BYTE gsm_wait_for_modbus;
+EXT BYTE gsm_uart_status;
+
+EXT BYTE gsm_apn_from_sim;
+
+#define WAITING		 	0
+#define SENDING 		1
+#define COMPLETE		2
+
+#define GSM_MESSAGE_NULL	0
+#define GSM_MESSAGE_OK 		1
+#define GSM_MESSAGE_ERROR 	2
+#define GSM_WAIT_MESSAGE 	3
+
+#define GSM_CLARO		0
+#define GSM_VIVO		1
+
+
+EXT unsigned long long  EnergGerA_int64			;
+EXT unsigned long long  EnergGerB_int64			;
+EXT unsigned long long  EnergGerC_int64			;
+EXT unsigned long long  EnergGerT_int64			;
+EXT unsigned long long  ConsumoA_int64			;
+EXT unsigned long long  ConsumoB_int64			;
+EXT unsigned long long  ConsumoC_int64			;
+EXT unsigned long long  ConsumoT_int64			;
+EXT unsigned long long  EnergIndA_int64			;
+EXT unsigned long long  EnergIndB_int64			;
+EXT unsigned long long  EnergIndC_int64			;
+EXT unsigned long long  EnergIndT_int64			;
+EXT unsigned long long  EnergCapA_int64			;
+EXT unsigned long long  EnergCapB_int64			;
+EXT unsigned long long  EnergCapC_int64			;
+EXT unsigned long long  EnergCapT_int64			;
+
+EXT  float temperatura_ptc_ch0;
+EXT  float temperatura_ptc_ch1;
+
+EXT float EnergGerPontaMesPassado;
+EXT float EnergGerForaPontaMesPassado;
+EXT float TpAlote;
+EXT float TpBlote;
+EXT float TpClote;
+EXT float TcAlote;
+EXT float DhtUAforCalib;
+EXT float DhtUBforCalib;
+EXT float DhtUCforCalib;
+EXT float DhtIAforCalib;
+EXT float EnergGerReservMesPassado 		        ;
+EXT float ConsumoPontaMesPassado			    ;
+EXT float ConsumoForaPontaMesPassado		    ;
+EXT float ConsumoReservMesPassado 			    ;
+EXT float EnergIndPontaMesPassado			    ;
+EXT float EnergIndForaPontaMesPassado		    ;
+EXT float EnergIndReservMesPassado 		        ;
+EXT float EnergCapPontaMesPassado			    ;
+EXT float EnergCapForaPontaMesPassado		    ;
+EXT float EnergCapReservMesPassado 		        ;
+EXT float MaxPotAtivPontaMesPassado		        ;
+EXT float MaxPotAtivForaPontaMesPassado	        ;
+EXT float MaxPotAtivReservMesPassado		    ;
+EXT float MaxPotReatPontaMesPassado		        ;
+EXT float MaxPotReatForaPontaMesPassado	        ;
+EXT float MaxPotReatReservMesPassado 		    ;
+EXT float EnergGerPontaEsteMesAteAgora		    ;
+EXT float EnergGerForaPontaEsteMesAteAgora	    ;
+EXT float EnergGerReservEsteMesAteAgora 	    ;
+EXT float ConsumoPontaEsteMesAteAgora		    ;
+EXT float ConsumoForaPontaEsteMesAteAgora	    ;
+EXT float ConsumoReservEsteMesAteAgora 	        ;
+EXT float EnergIndPontaEsteMesAteAgora		    ;
+EXT float EnergIndForaPontaEsteMesAteAgora	    ;
+EXT float EnergIndReservEsteMesAteAgora 		;
+EXT float EnergCapPontaEsteMesAteAgora			;
+EXT float EnergCapForaPontaEsteMesAteAgora		;
+EXT float EnergCapReservEsteMesAteAgora 		;
+EXT float MaxPotAtivPontaEsteMesAteAgora		;
+EXT float MaxPotAtivForaPontaEsteMesAteAgora	;
+EXT float MaxPotAtivReservEsteMesAteAgora		;
+EXT float MaxPotReatPontaEsteMesAteAgora		;
+EXT float MaxPotReatForaPontaEsteMesAteAgora	;
+EXT float MaxPotReatReservEsteMesAteAgora		;
+EXT float EnergGerPontaHojeAteAgora		        ;
+EXT float EnergGerForaPontaHojeAteAgora	        ;
+EXT float EnergGerReservHojeAteAgora 			;
+EXT float ConsumoPontaHojeAteAgora				;
+EXT float ConsumoForaPontaHojeAteAgora 		    ;
+EXT float ConsumoReservHojeAteAgora 			;
+EXT float EnergIndPontaHojeAteAgora			    ;
+EXT float EnergIndForaPontaHojeAteAgora		    ;
+EXT float EnergIndReservHojeAteAgora 			;
+
+
+EXT  float MMUaAcc;	 //Ua
+EXT  float MMUbAcc;	 //Ub
+EXT  float MMUcAcc;	 //Uc
+EXT  float MMIaAcc;	 //Ia
+EXT  float MMIbAcc;	 //Ib
+EXT  float MMIcAcc;	 //Ic
+EXT   float MMDemPAcc;	 //Demanda 3F  P
+EXT  float MMDemQAcc;	 //Demanda 3F  R
+EXT  float MMFp3Acc ;	 //FP		   3F
+EXT  float MMNpontosGrandezas; //numero de pontos acumulados
+EXT float MMTempAcc;
+
+
+
+
+
+
+#if EQUIP!=CM_EQUIP
+
+EXT  float PotAtivPonta15min;//
+EXT  float PotAtivForaPonta15min;//
+EXT  float PotAtivReserv15min;//
+EXT  float PotReatPonta15min;//
+EXT  float PotReatForaPonta15min;//
+EXT  float PotReatReserv15min;//
+#endif
+
+#endif
+
+/******************************************************************************
+ **                            End Of File
+ ******************************************************************************/

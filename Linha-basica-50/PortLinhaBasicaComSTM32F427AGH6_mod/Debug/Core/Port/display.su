@@ -1,0 +1,11 @@
+../Core/Port/display.c:119:6:DisplayInit	16	static
+../Core/Port/display.c:146:6:WriteChar	24	static
+../Core/Port/display.c:227:6:WriteBanner	24	static
+../Core/Port/display.c:246:6:SkewBanner	24	static
+../Core/Port/display.c:278:6:WriteString	24	static
+../Core/Port/display.c:317:6:FloatToStrForEnergy	48	static
+../Core/Port/display.c:526:6:FloatToStrForPulso	48	static
+../Core/Port/display.c:739:6:IntToStr	24	static
+../Core/Port/display.c:753:6:IntToStr1	40	static
+../Core/Port/display.c:775:6:FloatToStr	40	static
+../Core/Port/display.c:903:6:setDpyPiscante	16	static

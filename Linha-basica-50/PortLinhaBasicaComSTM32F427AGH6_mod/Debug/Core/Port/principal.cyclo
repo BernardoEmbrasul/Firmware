@@ -1,0 +1,11 @@
+../Core/Port/principal.c:121:6:refresh_ip	1
+../Core/Port/principal.c:166:6:VerificaNumeroDeSerie	2
+../Core/Port/principal.c:209:6:WriteAddrToAD	1
+../Core/Port/principal.c:230:7:ReadValueFromAD	1
+../Core/Port/principal.c:301:6:GetTemperatureFromAD	10
+../Core/Port/principal.c:401:5:main1	26
+../Core/Port/principal.c:720:7:modbus_message_received	16
+../Core/Port/principal.c:810:5:udp_callback	1
+../Core/Port/principal.c:825:5:tcp_callback	1
+../Core/Port/principal.c:889:6:send_data	6
+../Core/Port/principal.c:974:13:timer_poll	1

@@ -1,0 +1,148 @@
+# depslib dependency file v1.0
+1623098143 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\adc.c
+	"global.h"
+
+1623162525 c:\users\cesar\downloads\md4060_v1.44\firmware principal\global.h
+	"linhabasica_port.h"
+	"config.h"
+	"adc1.h"
+	"battram.h"
+	"interface.h"
+	"rtc.h"
+	"flash.h"
+	"config1.h"
+	"config.h"
+	"uespecific.h"
+	"uart.h"
+	"wdt.h"
+	"display.h"
+	"displayCM.h"
+	"modbus.h"
+	<math.h>
+	<string.h>
+	"calculos.h"
+	"calculos1.h"
+	"extint.h"
+	"flash.h"
+	"uart.h"
+	"principal.h"
+	"timer.h"
+	"ssp.h"
+
+1623161141 c:\users\cesar\downloads\md4060_v1.44\firmware principal\linhabasica_port.h
+	<stdint.h>
+
+1619785410 c:\users\cesar\downloads\md4060_v1.44\firmware principal\config.h
+	"config1.h"
+
+1623163193 c:\users\cesar\downloads\md4060_v1.44\firmware principal\config1.h
+
+1622828443 c:\users\cesar\downloads\md4060_v1.44\firmware principal\adc1.h
+
+1623101384 c:\users\cesar\downloads\md4060_v1.44\firmware principal\battram.h
+	"rtc.h"
+
+1472648192 c:\users\cesar\downloads\md4060_v1.44\firmware principal\rtc.h
+
+1594733151 c:\users\cesar\downloads\md4060_v1.44\firmware principal\interface.h
+
+1472648173 c:\users\cesar\downloads\md4060_v1.44\firmware principal\flash.h
+
+1623163128 c:\users\cesar\downloads\md4060_v1.44\firmware principal\uespecific.h
+	"config1.h"
+	"config.h"
+	"linhabasica_port.h"
+	"rtc.h"
+	"flash.h"
+	"battram.h"
+
+1478601650 c:\users\cesar\downloads\md4060_v1.44\firmware principal\uart.h
+
+1472648190 c:\users\cesar\downloads\md4060_v1.44\firmware principal\wdt.h
+
+1472648173 c:\users\cesar\downloads\md4060_v1.44\firmware principal\display.h
+
+1623101094 c:\users\cesar\downloads\md4060_v1.44\firmware principal\displaycm.h
+
+1472648190 c:\users\cesar\downloads\md4060_v1.44\firmware principal\modbus.h
+
+1549547304 c:\users\cesar\downloads\md4060_v1.44\firmware principal\calculos.h
+
+1549547319 c:\users\cesar\downloads\md4060_v1.44\firmware principal\calculos1.h
+
+1472648173 c:\users\cesar\downloads\md4060_v1.44\firmware principal\extint.h
+
+1472648190 c:\users\cesar\downloads\md4060_v1.44\firmware principal\principal.h
+
+1623101273 c:\users\cesar\downloads\md4060_v1.44\firmware principal\timer.h
+
+1623099870 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\display.c
+	"global.h"
+
+1623099931 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\extint.c
+	"global.h"
+
+1623099900 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\displaycm.c
+	"global.h"
+
+1623089479 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\global.c
+	"linhabasica_port.h"
+	"battram.h"
+	"rtc.h"
+	"flash.h"
+	"config1.h"
+	"config.h"
+
+1623101304 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\linhabasica_port.c
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+
+1623101273 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\interfacecm.c
+	"global.h"
+
+1623102033 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\battram.c
+	"global.h"
+
+1623101474 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\interface.c
+	"global.h"
+
+1623093244 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\netconfig.c
+
+1623162061 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\rtc.c
+	"global.h"
+
+1623102397 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\wdt.c
+	"global.h"
+
+1623158439 c:\users\cesar\downloads\md4060_v1.44\firmware principal\ssp.h
+
+1623099800 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\calculos1.c
+	"global.h"
+
+1623102349 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\timer.c
+	"global.h"
+
+1623161847 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\flash.c
+	"global.h"
+
+1623161109 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\uart.c
+	"global.h"
+
+1623090634 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\main.c
+	<stdio.h>
+	<stdlib.h>
+	"principal.c"
+
+1623100663 c:\users\cesar\downloads\md4060_v1.44\firmware principal\principal.c
+	<stdbool.h>
+	<string.h>
+	"linhabasica_port.h"
+	"global.h"
+
+1623161243 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\modbus.c
+	"global.h"
+
+1623162061 source:c:\users\cesar\downloads\md4060_v1.44\firmware principal\calculos.c
+	"global.h"
+

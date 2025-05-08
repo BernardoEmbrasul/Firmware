@@ -1,0 +1,15 @@
+../Core/Port/uart.c:38:6:debug_gsm	2
+../Core/Port/uart.c:50:6:uart1_admite_nested_interrupt_srv	1
+../Core/Port/uart.c:207:6:uart0_admite_nested_interrupt_srv	1
+../Core/Port/uart.c:373:7:UARTInit	1
+../Core/Port/uart.c:494:6:UART1Send	1
+../Core/Port/uart.c:513:6:UARTSend	2
+../Core/Port/uart.c:557:6:UARTSendOnly	1
+../Core/Port/uart.c:585:6:UART1SendOnly	1
+../Core/Port/uart.c:609:7:UART1Init	1
+../Core/Port/uart.c:749:7:UARTIsDataReady	1
+../Core/Port/uart.c:775:7:UARTWaitForByte	1
+../Core/Port/uart.c:802:7:UARTReceiveByte	1
+../Core/Port/uart.c:825:6:UARTTransmitByte	1
+../Core/Port/uart.c:856:6:UARTTransmitString	2
+../Core/Port/uart.c:861:6:_es_putc_retarget	1

@@ -1,0 +1,213 @@
+/*****************************************************************************
+ *   config.h:  Header file for system and debug configuration 
+ *
+ *   Copyright(C) 2006, Embrasul Ind. Eletr�nica
+ *   All rights reserved.
+ *
+ *   History
+ *   2006.17.04  ver 1.00    Prelimnary version, first Release
+ *
+ ******************************************************************************/
+
+/*
+   87100001(MD4000)
+   89000001(TR4000) 
+   93000001(CM4040)
+ */
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
+
+
+//#define COM_TI 0
+
+
+
+
+
+#undef  REVISAO_D	//por enquanto trato todos os LPC como n�o sendo revis�o D, para asegurar a escrita boa na flash
+#define COM_SNTP OFF	//alterar tamb�m net_config.c	
+#define COM_DHCP OFF	//alterar tamb�m net_config.c
+
+
+#define FREQ_FUNDAMENTAL 60
+#undef TR_INVERSOR
+#define FP_COM_HARMONICAS NAO// default= NAO
+
+
+#define ZERADO 0
+#define SEM_ETHERNET_COM_RS485 		0
+#define COM_ETHERNET_SEM_RS485  	1
+#define COM_ETHERNET_COM_RS485  	2
+#define SEM_ETHERNET_SEM_RS485  	3
+
+#define SEM 0
+#define COM 1
+
+#define NAO 0
+#define SIM 1
+
+#define nOK 0
+#define OK  1
+
+#define HIGH    1 //utilizado nas unions
+#define LOW	0 //utilizado nas unions
+
+
+#define DIVISOR_RESISTIVO 0
+#define TRANSFORMADOR_TP  1
+
+#define MONOFASICO 0
+#define TRIFASICO 1
+
+#define NFIRST 1     //Numero do FIRST de 1 a 16
+#undef  MD_EM_TESTE
+#undef  MODELO_PADRAO_DHT_FIXO 
+#undef MODELO_PADRAO 
+
+#define MD_EQUIP 0
+#define TR_EQUIP 1
+#define CM_EQUIP 2
+#define CA_EQUIP 3
+#define CP_EQUIP 4
+#define CT_EQUIP 5
+#define CD_EQUIP 6
+
+#define VOLTAGE 0
+#define CURRENT 1
+
+///////////////////////////////////////////////////////////////////////////////////
+// Regi�o Configura��es
+#include "config1.h"
+
+
+
+
+#define NFIRST 1     //Numero do FIRST de 1 a 16
+#undef  MD_EM_TESTE
+#define SEMCAPATOR NAO
+//#define MODELO_D//guilherme coloquei 13/05/2010
+// Fim de regi�o de Configura��es
+///////////////////////////////////////////////////////////////////////////////////
+
+// #define MODELO_3G 
+
+//#undef TOROIDE_TRIFASICO
+
+
+//#define ENTRADAS_U TRANSFORMADOR_TP //estava assim no MD4040 e calibrou certo mesmo assim.
+#define HABzeraconsumoCM
+#define ENTRADAS_U DIVISOR_RESISTIVO //TRANSFORMADOR_TP
+#define DEBUG_SEM_AD 						NAO
+#define MD4040 //nunca mudar isto! s� mudaremos se formos fazer um MD4000 com LPC23xx
+#define DEBUG_SEM_BLOCO2K_EM_BATTRAM 		NAO
+#define UTILIZAR_TABELA_DE_FORMA_DE_ONDA 	NAO
+#define COM_LINEARIZACAO 						SIM
+#define COM_LINEARIZACAO_DE_MODULO_DE_CORREMTE 	SIM
+#define MODO_LEVANTA_CURVAS_TP_TC 				NAO
+#define MODODEBUGGER OFF
+#define ACELERA15MIN OFF
+#define ACELERAR_1SEG OFF
+#undef  CLIENTE_SETPOINT_X_1000
+#undef  COM_MEM_COPY
+#define HABSERFIXO NAO
+#define CAPATOR100MA SIM
+#define ACELERA_RELOGIO NAO //ao setar em SIM, acelera a escrita de registros de 15min, por meio de saltos de relogio.
+// ENCHE_MM: faz com que a mem�ria de massa seja preenchida com zeros
+// 			utilizada somente para testes de verifica��o da flash.
+//		Valores poss�veis: SIM ou NAO
+#define ENCHE_MM NAO
+
+#ifdef MODELO_S501
+	#undef MODELO_EARHT
+	#define MODELO_EARHT
+#endif
+
+
+#ifdef  MODELO_EARHT
+	#define  MODELO_EA
+#endif
+
+
+#ifdef MODELO_PADRAO
+# define DEBUG_SEM_TCPIP  NAO
+# define MODELO COM_ETHERNET_COM_RS485
+# define ComComunicacaoRS485 SIM
+#endif
+
+#ifdef MODELO_EA
+# define DEBUG_SEM_TCPIP  NAO
+# define MODELO COM_ETHERNET_SEM_RS485
+# define ComComunicacaoRS485 NAO
+#endif
+
+#ifdef MODELO_E
+# define DEBUG_SEM_TCPIP  NAO
+# define MODELO COM_ETHERNET_SEM_RS485
+# define ComComunicacaoRS485 NAO
+#endif
+
+#ifdef MODELO_R
+# define DEBUG_SEM_TCPIP  SIM
+# define MODELO SEM_ETHERNET_COM_RS485
+# define ComComunicacaoRS485 SIM
+#endif
+
+#ifdef MODELO_RA
+# define DEBUG_SEM_TCPIP  SIM
+# define MODELO SEM_ETHERNET_COM_RS485
+# define ComComunicacaoRS485 SIM
+#endif
+
+#ifdef MODELO_B
+# define DEBUG_SEM_TCPIP  SIM
+# define MODELO SEM_ETHERNET_SEM_RS485
+# define ComComunicacaoRS485 NAO
+#endif
+
+#ifdef MODELO_REA
+# define DEBUG_SEM_TCPIP  NAO
+# define MODELO COM_ETHERNET_COM_RS485
+# define ComComunicacaoRS485 SIM
+#endif
+
+#define CAPATOR100MA SIM
+
+
+#define CM4020 0
+#define CM4040 1
+
+#if MD4040TI==1
+	#define MODELO_DE_CONTROLADOR CM4040
+#else
+	#define MODELO_DE_CONTROLADOR CM4020
+#endif
+
+#if MD4040TI==1
+	#define COM_SENHA SIM 
+#else
+	#define COM_SENHA SIM
+#endif
+
+#define portugues
+
+
+#ifdef MODELO_PADRAO
+# undef VER1
+# undef VER2
+# undef VER3
+# define VER1 '6'
+# define VER2 '6'
+# define VER3 '6'
+#else
+# undef VER1
+# undef VER2
+# undef VER3
+# define VER1 '1'
+# define VER2 '2'
+# define VER3 '0'
+#endif
+
+// Version 1.01 Novo início da versão
+
+#endif //__CONFIG_H__

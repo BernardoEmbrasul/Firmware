@@ -1,0 +1,17 @@
+../Core/Port/flash.c:124:6:MoveRamToBuffer	32	static
+../Core/Port/flash.c:142:6:MoveBytesBufferToBuffer	32	static
+../Core/Port/flash.c:158:6:MoveBufferToRam	32	static
+../Core/Port/flash.c:175:6:MoveFlashToBuffer	32	static
+../Core/Port/flash.c:191:6:IniciaParametrosCalibracaoDefault	8	static
+../Core/Port/flash.c:333:6:RestauraCalibracao	32	static
+../Core/Port/flash.c:532:6:load_MAC	16	static
+../Core/Port/flash.c:561:6:AtualizaPolinomios	16	static
+../Core/Port/flash.c:729:6:RestauraParametrizacao	48	static
+../Core/Port/flash.c:875:6:RestauraParametrizacaoDefault	16	static
+../Core/Port/flash.c:1154:6:SalvaParametrizacao	24	static
+../Core/Port/flash.c:1252:6:CalcLRCofDataHeader	16	static
+../Core/Port/flash.c:1273:6:PowerUp	112	static
+../Core/Port/flash.c:1678:15:TestaMomento	56	static
+../Core/Port/flash.c:1719:15:TestaMomento1	32	static
+../Core/Port/flash.c:1777:6:PowerDown	112	static
+../Core/Port/flash.c:1960:6:AtualizaParametrizacao	4	static

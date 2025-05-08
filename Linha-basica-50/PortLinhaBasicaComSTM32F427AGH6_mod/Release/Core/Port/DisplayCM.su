@@ -1,0 +1,12 @@
+DisplayCM.c:49:6:Atraso	0	static
+DisplayCM.c:56:6:WrLcdChar	16	static
+DisplayCM.c:90:6:WrLcdData	0	static
+DisplayCM.c:127:6:WrLcdCom	0	static
+DisplayCM.c:161:6:PulseE	0	static
+DisplayCM.c:191:6:PrtLcd	8	static
+DisplayCM.c:231:6:PrtLcd2	32	static
+DisplayCM.c:300:6:InitLcd	0	static
+DisplayCM.c:309:6:ResetLcd	0	static
+DisplayCM.c:338:6:PrtLcdBcdNibble	0	static
+DisplayCM.c:356:6:PosCur	0	static
+DisplayCM.c:383:6:GeraSimbolos	0	static

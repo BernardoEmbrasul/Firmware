@@ -1,0 +1,11 @@
+../Core/Port/display.c:119:6:DisplayInit	2
+../Core/Port/display.c:146:6:WriteChar	3
+../Core/Port/display.c:227:6:WriteBanner	2
+../Core/Port/display.c:246:6:SkewBanner	4
+../Core/Port/display.c:278:6:WriteString	5
+../Core/Port/display.c:317:6:FloatToStrForEnergy	27
+../Core/Port/display.c:526:6:FloatToStrForPulso	28
+../Core/Port/display.c:739:6:IntToStr	1
+../Core/Port/display.c:753:6:IntToStr1	1
+../Core/Port/display.c:775:6:FloatToStr	17
+../Core/Port/display.c:903:6:setDpyPiscante	1

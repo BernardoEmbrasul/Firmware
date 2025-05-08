@@ -1,0 +1,5 @@
+
+
+Version 1.42 - Corrigido cálculo de dados instantaneos para acumulação de Consumo e Energias
+
+Version 1.43 - Versão alternativa com velocidade de 10M para usar com MODEM/Raspberry

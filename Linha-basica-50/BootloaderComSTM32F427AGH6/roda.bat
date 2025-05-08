@@ -1,0 +1,1 @@
+python bootloader.py "C:\Users\Dell 2\STM32CubeIDE\Linha-basica-50\PortLinhaBasicaComSTM32F427AGH6\PortLinhaBasicaComSTM32F427AGH6_mod\Debug\PortLinhaBasicaComSTM32F427AGH6_mod.bin"

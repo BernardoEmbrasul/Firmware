@@ -1,0 +1,2725 @@
+/*****************************************************************************
+ *   principal.c:  Aqui se encontram as rotinas de comunicacao MODBUS
+ *
+ *   Projeto MD2010-ARM
+ *
+ *   History
+ *   2006.25.07  ver. codigo 1.00  Versão Preliminar.
+ *
+ *
+ ******************************************************************************/
+#define EXT extern
+#include "global.h"
+
+
+void gotoBootLoader(void);
+void SearchTimeStampInMassMemory(void);
+
+extern short modo_escritaMM;
+extern unsigned char modoprog;
+extern long int etapa_escritaMM;
+extern unsigned int pagina;
+
+const BYTE auchCRCHi[]={
+	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+	0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+	0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+	0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+	0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+	0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+	0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+	0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+	0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+	0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+	0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+	0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+	0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+	0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+	0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+	0x40 };
+
+const BYTE auchCRCLo[]={
+	0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+	0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+	0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+	0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+	0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+	0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+	0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+	0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+	0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+	0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+	0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+	0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+	0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+	0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+	0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+	0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+	0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+	0x40 };
+
+
+void gotoBootLoader(void)
+{
+
+#if LEGADO
+    void (*bootloader_code_entry)(void);
+    bootloader_code_entry = (void (*)(void))0;
+    bootloader_code_entry();
+#else
+
+    forceReset();  //no lugar de ir direto para o bootloader, força o reset...
+#endif
+}
+
+short CalcCRC(short oldCRC, BYTE newbyte)
+{
+	short index;
+
+	CRCHi =((oldCRC >> 8) & 0x00FF);
+	CRCLo = (oldCRC & 0x00FF);
+	index = Xor(CRCHi,(short)newbyte);
+	CRCHi = Xor(CRCLo,(short)auchCRCHi[index]);
+	CRCLo = auchCRCLo[index];
+	OldCrc=((CRCHi << 8) | CRCLo);
+
+	return(OldCrc);
+}
+
+/* Realiza operação Xor entre duas variaveis do tipo short */
+short Xor(short in1, short in2)
+{
+	short nin1,nin2;
+	nin1=~in1;
+	nin2=~in2;
+	return((nin1&in2)|(in1&nin2));
+}
+
+
+/* Inicialização de Variaveis da Comunicação */
+void ComMODBUSInit()
+{
+	UART0TxEmpty = 1;
+	UART0Count = 0;
+
+    UART0CountQuectel=0;
+
+	HabResponder=OFF;
+	HabResponderPR4000=OFF;
+	OldCrc=0xFFFF;
+	FlagChegouEnderecoMODBUS=NAO;
+	FlagChegouBroadCast=NAO;
+	FlagFinalizaRecepcaoDeMensagemMODBUS=NAO;
+#if HABSERFIXO==NAO
+	CLRpinoEmPorta(0,HABSER_PIN);  // (habilita recepcao...)
+#else
+	SETpinoEmPorta(0,HABSER_PIN);  // (desabilita recepcao...)
+#endif
+	ExceptionCodeMODBUS=SEM_ERRO;
+}
+
+void ResponderPR4000()
+{
+	union RegMODBUS{short i; BYTE c[2];};
+	union RegMODBUS Registro;
+	DWORD t;
+	short i;
+	short *pShort;
+	short cntbytes=0;
+	short TamanhoDaResposta;
+
+	if (UART0Buffer[FUNC_PR4000]==1)
+	{
+		pShort=&relacaoTPpri;
+		i=0;
+
+		RTCStop();
+		for (;;)
+		{
+			cntbytes++;
+			if (cntbytes!=EnderecoMODBUS)
+			{
+				Registro.c[MSB]=UART0Buffer[i+FUNC_PR4000+1];
+				Registro.c[LSB]=UART0Buffer[i+FUNC_PR4000+2];
+				*pShort=Registro.i;
+				pShort++;
+				i=i+2;
+			}
+			else
+			{
+				break;
+			}
+		}
+		RTCSetTime(rtc_data	  ) ;
+		RTCStart();
+
+		MeuEnderecoMODBUS	=UART0Buffer[EnderecoMODBUS];
+		//se o endereco modbus for zero, então devemos atribuir a ele
+		//os tres últimos digitos do número de serie.
+		//problemas!! podemos ter um numero de serie:
+		// tipo 89000490!1 490>255 !!!
+		if (MeuEnderecoMODBUS==0)
+		{
+			MeuEnderecoMODBUS=(nserie_str[5]-30)*100+(nserie_str[6]-30)*10+(nserie_str[7]-30);
+		}
+		if (UART0Buffer[BAUDRate   ]<=7)
+		{
+			if (UART0Buffer[PARIDStops ]<=2)
+			{
+				BaudRatex			=UART0Buffer[BAUDRate   ];
+				ParidadeStops		=UART0Buffer[PARIDStops ];
+			}
+		}
+		IPOcteto1			=UART0Buffer[XIPOcteto1 ];
+		IPOcteto2			=UART0Buffer[XIPOcteto2 ];
+		IPOcteto3			=UART0Buffer[XIPOcteto3];
+		IPOcteto4			=UART0Buffer[XIPOcteto4 ];
+		MKOcteto1			=UART0Buffer[XMKOcteto1 ];
+		MKOcteto2			=UART0Buffer[XMKOcteto2 ];
+		MKOcteto3			=UART0Buffer[XMKOcteto3 ];
+		MKOcteto4			=UART0Buffer[XMKOcteto4 ];
+		GWOcteto1			=UART0Buffer[XGWOcteto1 ];
+		GWOcteto2			=UART0Buffer[XGWOcteto2 ];
+		GWOcteto3			=UART0Buffer[XGWOcteto3 ];
+		GWOcteto4			=UART0Buffer[XGWOcteto4 ];
+		NroPorta 			=UART0Buffer[XNroPorta  ];
+		//na resposta o TR4000 nao usa o CRC no final...
+		//apenas dá um 'eco' dos 10 bytes enviados pelo mestre PR4k
+		TamanhoDaResposta=10;
+	}
+
+	//Leitura
+	rtc_data=RTCGetTime();
+	if (UART0Buffer[FUNC_PR4000]==0)
+	{
+		pShort=&relacaoTPpri;
+		i=0;
+		cntbytes=0;
+		for (;;)
+		{
+			cntbytes++;
+			if (cntbytes!=EnderecoMODBUS)
+			{
+				Registro.i=*pShort;
+				UART0Buffer[i+FUNC_PR4000+1]=Registro.c[MSB];
+				UART0Buffer[i+FUNC_PR4000+2]=Registro.c[LSB];
+				pShort++;
+				i=i+2;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		UART0Buffer[EnderecoMODBUS]=MeuEnderecoMODBUS;
+		UART0Buffer[BAUDRate   ]	=BaudRatex		;
+		UART0Buffer[PARIDStops ]	=ParidadeStops	;
+		UART0Buffer[XIPOcteto1 ]	=IPOcteto1		;
+		UART0Buffer[XIPOcteto2 ]	=IPOcteto2		;
+		UART0Buffer[XIPOcteto3] 	=IPOcteto3		;
+		UART0Buffer[XIPOcteto4 ]	=IPOcteto4		;
+		UART0Buffer[XMKOcteto1 ]	=MKOcteto1		;
+		UART0Buffer[XMKOcteto2 ]	=MKOcteto2		;
+		UART0Buffer[XMKOcteto3 ]	=MKOcteto3		;
+		UART0Buffer[XMKOcteto4 ]	=MKOcteto4		;
+		UART0Buffer[XGWOcteto1 ]	=GWOcteto1		;
+		UART0Buffer[XGWOcteto2 ]	=GWOcteto2		;
+		UART0Buffer[XGWOcteto3 ]	=GWOcteto3		;
+		UART0Buffer[XGWOcteto4 ]	=GWOcteto4		;
+		UART0Buffer[XNroPorta  ]	=NroPorta 		;
+		UART0Buffer[XEqPARAMETRIZADO]	= EquipamentoParametrizado;
+		TamanhoDaResposta=143;
+	}
+
+	SETpinoEmPorta(0,HABSER_PIN);  // (desabilita recepcao...)
+	for (t=0;t<10000;t++);
+
+	//respondo somente se a mensagem PR4000 é pra mim
+	if (eCOMIGOeCOMTODOS==eCOMIGO)
+	{
+		UARTSend((BYTE *)&UART0Buffer,TamanhoDaResposta);
+	}
+	for (t=0;t<20;t++);
+	for (t=0;t<20;t++);
+	CLRpinoEmPorta(0,HABSER_PIN);  // (habilita recepcao...)
+	HabResponderPR4000=OFF;
+
+	/*agoraserão executas as funções remotas solicitadas pelo mestre*/
+	if (UART0Buffer[FUNC_PR4000]==1)
+	{
+		EquipamentoParametrizado=SIM; //em teste.16jan07
+		UARTInit(baudrates[BaudRatex],ParidadeStops);
+
+		ip_config.IpAdr[0]=(U8)IPOcteto1;           // Local IP Address
+		ip_config.IpAdr[1]=(U8)IPOcteto2;           // Local IP Address
+		ip_config.IpAdr[2]=(U8)IPOcteto3;           // Local IP Address
+		ip_config.IpAdr[3]=(U8)IPOcteto4;           // Local IP Address
+		ip_config.DefGW[0]=(U8)GWOcteto1;           // Default GateWay
+		ip_config.DefGW[1]=(U8)GWOcteto2;           // Default GateWay
+		ip_config.DefGW[2]=(U8)GWOcteto3;           // Default GateWay
+		ip_config.DefGW[3]=(U8)GWOcteto4;           // Default GateWay
+		ip_config.NetMask[0]=(U8)MKOcteto1;         // Net Mask
+		ip_config.NetMask[1]=(U8)MKOcteto2;         // Net Mask
+		ip_config.NetMask[2]=(U8)MKOcteto3;         // Net Mask
+		ip_config.NetMask[3]=(U8)MKOcteto4;         // Net Mask
+		ip_config.PriDNS[0]=10;          // Primary DNS Server
+		ip_config.PriDNS[1]=10;          // Primary DNS Server
+		ip_config.PriDNS[2]=0;          // Primary DNS Server
+		ip_config.PriDNS[3]=1;          // Primary DNS Server
+		ip_config.SecDNS[0]=10;         // Secondary DNS Server
+		ip_config.SecDNS[1]=10;         // Secondary DNS Server
+		ip_config.SecDNS[2]=0;          // Secondary DNS Server
+		ip_config.SecDNS[3]=1;          // Secondary DNS Server
+
+		refresh_ip();
+
+		srv_ip[0] = 10;
+		srv_ip[1] = 10;
+		srv_ip[2] = 1;
+		srv_ip[3] = 7;
+
+		AtualizaParametrizacao();
+		toogleWDI();
+
+		SalvaParametrizacao();
+		PowerDown(); //force power down e reset
+	}
+}
+
+
+extern void ConfigurePLL_48Mhz ( void );
+
+void ResponderMODBUS()
+{
+	DWORD t;
+
+	union EndecoMODBUS{short i; BYTE c[2];};
+	union EndecoMODBUS EnderecoInicial;
+
+	union RegMODBUS{short i; BYTE c[2];};
+	union RegMODBUS Registro;
+
+	union NumeroDeRegistrosMODBUS{short i; BYTE c[2];};
+	union NumeroDeRegistrosMODBUS NumeroDeRegistros;
+
+	short TamanhoDaResposta;
+
+	short *pEnderecoZero,*pEnderecoAbsoluto;
+
+	BYTE const *pToflash2;
+	BYTE UART0Buffert1;
+	BYTE UART0Buffert2;
+
+	float *pToflash_float;
+	unsigned long *pToflash_dword;
+	BYTE const *pToIdOfRecord;
+
+	BYTE FuncaoSolicitada,ByteCount;
+	short k,i,index=0,index_out=0;
+
+	union EndecoFLASH1{DWORD dw; BYTE c[4];};
+	union EndecoFLASH1 EnderecoFLASH;
+
+	ExceptionCodeMODBUS=SEM_ERRO;
+	pEnderecoZero=(short *)&Versao;  //default
+
+	OldCrc=0xFFFF;
+
+	FuncaoSolicitada=UART0Buffer[index];
+	switch (FuncaoSolicitada)
+	{
+		case FUNCAO_SLAVE_ID:
+			{
+				//preparacao da resposta
+				UART0Buffer[index_out]=MeuEnderecoMODBUS;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				if (modelo_3g==SIM)
+				{
+					UART0Buffer[index_out]=ns0;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns1;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns2;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns3;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns4;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns5;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns6;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns7;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				}
+				UART0Buffer[index_out]=FUNCAO_SLAVE_ID;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=24; 		//2=ByteCount
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+#if EQUIP==CM_EQUIP
+				#if MD4040TI==0
+				UART0Buffer[index_out]=0x50;    //ID=0x40 = MD4000	ID=0x50 = CM4040
+				#else
+				UART0Buffer[index_out]=0x40;    //ID=0x40 = MD4000	ID=0x50 = CM4040
+				#endif
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+
+				//UART0Buffer[index_out]=0xFF;    //FF=ON
+				if ((TipodeLeituraModbus== NORMAL_MODBUS)||(TipodeLeituraModbus== FULL_RAM))
+					UART0Buffer[index_out]=0xF0;  //leitura normal
+				else
+					UART0Buffer[index_out]=0x0F; //leitura da MM
+
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				#if MD4040TI==0
+				UART0Buffer[index_out]='C';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='M';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='4';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='4';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				#else
+				UART0Buffer[index_out]='M';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='D';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='4';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='8';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				#endif
+#endif
+#if EQUIP==MD_EQUIP
+				UART0Buffer[index_out]=0x40;    //ID=0x40 = MD4000
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+
+				if ((TipodeLeituraModbus== NORMAL_MODBUS)||(TipodeLeituraModbus== FULL_RAM))
+					UART0Buffer[index_out]=0xF0;  //leitura normal
+				else
+					UART0Buffer[index_out]=0x0F; //leitura da MM
+
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='M';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='D';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='5';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+#ifdef MD4040
+				UART0Buffer[index_out]=' ';
+#else
+				UART0Buffer[index_out]='0';
+#endif
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=' ';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+#endif
+
+#if EQUIP==TR_EQUIP
+				UART0Buffer[index_out]=0x41;    //ID=0x41 = TR4000
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+
+				if ((TipodeLeituraModbus== NORMAL_MODBUS)||(TipodeLeituraModbus== FULL_RAM))
+					UART0Buffer[index_out]=0xF0;  //leitura normal
+				else
+					UART0Buffer[index_out]=0x0F; //leitura da MM
+
+#if CP40==1
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='C';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='P';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='4';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='-';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='-';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+
+#else
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='T';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='R';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='4';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='2';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='0';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+#endif
+#endif
+				UART0Buffer[index_out]='V';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='F';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=versao_str[0];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='.';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=versao_str[1];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=versao_str[2];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='N';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]='S';
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[0];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[1];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[2];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[3];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[4];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[5];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[6];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=nserie_str[7];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+
+				UART0Buffer[index_out]=CRCHi;
+				index_out++;
+				UART0Buffer[index_out]=CRCLo;
+
+				TamanhoDaResposta=29;
+				if (modelo_3g==SIM){
+					TamanhoDaResposta=29+8;
+				}
+				break;
+			}
+		case FUNCAO_READ_HOLD:
+			{
+				if (TipodeLeituraModbus==FULL_RAM)
+				{
+
+					pEnderecoZero=(short*)RTC_RAM_BASE_ADDR; // posição onde começa a BAT-RAM. Deve ficar assim!
+
+				}
+				else
+				{
+					pEnderecoZero=(short *)&Versao;
+				}
+
+				rtc_data=RTCGetTime();
+				index++;
+				EnderecoInicial.c[HIGH]  =UART0Buffer[index]; index++;
+				EnderecoInicial.c[LOW]   =UART0Buffer[index]; index++;
+				NumeroDeRegistros.c[HIGH]=UART0Buffer[index]; index++; //deve ser zero sempre!
+				NumeroDeRegistros.c[LOW] =UART0Buffer[index]; index++;
+
+				if ((unsigned)(EnderecoInicial.i+NumeroDeRegistros.c[LOW])>811)
+				{
+					if ((unsigned)EnderecoInicial.i<852)
+					{
+						ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;
+					}
+				}
+				if ((unsigned)(EnderecoInicial.i+NumeroDeRegistros.c[LOW])>896){
+					ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;
+				}
+				if (NumeroDeRegistros.c[HIGH]!=0) 			{ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;}
+
+				//preparacao da resposta
+				UART0Buffer[index_out]=MeuEnderecoMODBUS;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				//	#ifdef MODELO_3G
+				if (modelo_3g==SIM){
+					UART0Buffer[index_out]=ns0;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns1;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns2;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns3;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns4;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns5;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns6;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns7;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					//	#endif
+				}
+				UART0Buffer[index_out]=FUNCAO_READ_HOLD;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=(NumeroDeRegistros.c[LOW])*2;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+
+				//calculo do endereco absoluto no equipamento
+				pEnderecoAbsoluto=pEnderecoZero+EnderecoInicial.i;
+
+				EnderecoFLASH.c[3]=0;
+				EnderecoFLASH.c[2]=0;
+				EnderecoFLASH.c[1]=EnderecoInicial.c[HIGH];
+				EnderecoFLASH.c[0]=EnderecoInicial.c[LOW];
+
+				switch (TipodeLeituraModbus)
+				{
+					case READ_FLASH:
+						{
+#ifndef REVISAO_D
+							ConfigurePLL_18Mhz();
+#endif
+
+							pToflash2=(const BYTE *)((DWORD)SETOR_MM_INICIO); //a base para ler a flash é o setor SETOR_MM_INICIO.
+							pToflash2 += (2*EnderecoFLASH.dw);
+
+							ExceptionCodeMODBUS=SEM_ERRO;
+							for (i=0;i<((NumeroDeRegistros.c[LOW]));i++)
+							{
+								UART0Buffert1=*pToflash2++;
+								UART0Buffert2=*pToflash2++;
+								UART0Buffer[index_out]=UART0Buffert2;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+								UART0Buffer[index_out]=UART0Buffert1;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+							}
+#ifndef REVISAO_D
+							ConfigurePLL_72Mhz();
+#endif
+
+							break;
+						}
+					case READ_FLASH1:
+						{
+#ifndef REVISAO_D
+							ConfigurePLL_18Mhz();
+#endif
+
+							pToflash2=(const BYTE *)((DWORD)SETOR_MM_BASE1); //0x40000a base para ler a flash é o setor SETOR_MM_INICIO.
+							pToflash2 += (2*EnderecoFLASH.dw);
+
+							ExceptionCodeMODBUS=SEM_ERRO;
+							for (i=0;i<(NumeroDeRegistros.c[LOW]);i++)
+							{
+								UART0Buffert1=*pToflash2++;
+								UART0Buffert2=*pToflash2++;
+								UART0Buffer[index_out]=UART0Buffert2;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+								UART0Buffer[index_out]=UART0Buffert1;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+
+							}
+#ifndef REVISAO_D
+							ConfigurePLL_72Mhz();
+#endif
+
+							break;
+						}
+					case READ_FLASH2:
+						{
+#ifndef REVISAO_D
+							ConfigurePLL_18Mhz();
+#endif
+
+							pToflash2=(const BYTE *)((DWORD)SETOR_MM_BASE2); //0x50000 a base para ler a flash é o setor SETOR_MM_INICIO.
+							pToflash2 += (2*EnderecoFLASH.dw);
+
+							ExceptionCodeMODBUS=SEM_ERRO;
+							for (i=0;i<(NumeroDeRegistros.c[LOW]);i++)
+							{
+								UART0Buffert1=*pToflash2++;
+								UART0Buffert2=*pToflash2++;
+								UART0Buffer[index_out]=UART0Buffert2;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+								UART0Buffer[index_out]=UART0Buffert1;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+
+							}
+#ifndef REVISAO_D
+							ConfigurePLL_72Mhz();
+#endif
+
+							break;
+						}
+					case READ_FLASH3:
+						{
+#ifndef REVISAO_D
+							ConfigurePLL_18Mhz();
+#endif
+
+							pToflash2=(const BYTE *)((DWORD)SETOR_MM_BASE3); //0x60000 a base para ler a flash é o setor SETOR_MM_INICIO.
+							pToflash2 += (2*EnderecoFLASH.dw);
+
+							ExceptionCodeMODBUS=SEM_ERRO;
+							for (i=0;i<(NumeroDeRegistros.c[LOW]);i++)
+							{
+								UART0Buffert1=*pToflash2++;
+								UART0Buffert2=*pToflash2++;
+								UART0Buffer[index_out]=UART0Buffert2;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+								UART0Buffer[index_out]=UART0Buffert1;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+
+							}
+#ifndef REVISAO_D
+							ConfigurePLL_72Mhz();
+#endif
+
+							break;
+						}
+					case READ_FLASH4:
+						{
+#ifndef REVISAO_D
+							ConfigurePLL_18Mhz();
+#endif
+
+							pToflash2=(const BYTE *)((DWORD)SETOR_MM_BASE4); //0x70000 a base para ler a flash é o setor SETOR_MM_INICIO.
+							pToflash2 += (2*EnderecoFLASH.dw);
+
+							ExceptionCodeMODBUS=SEM_ERRO;
+							for (i=0;i<(NumeroDeRegistros.c[LOW]);i++)
+							{
+								UART0Buffert1=*pToflash2++;
+								UART0Buffert2=*pToflash2++;
+
+								UART0Buffer[index_out]=UART0Buffert2;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+
+								UART0Buffer[index_out]=UART0Buffert1;
+								OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+
+							}
+#ifndef REVISAO_D
+							ConfigurePLL_72Mhz();
+#endif
+
+							break;
+						}
+					case  FULL_RAM:
+						ExceptionCodeMODBUS=SEM_ERRO;
+
+					default:
+						{
+							// Aqui entra o codigo para buscar o registro (baseado na data requerida)
+							#ifdef MEMORIA_DE_MASSA_NOVA
+
+							SearchTimeStampInMassMemory();
+
+							#endif
+
+
+							// Envia registros da RAM para a ethernet
+							if (ExceptionCodeMODBUS!=ILLEGAL_DATA_ADDRESS)
+							{
+								for (i=0;i<NumeroDeRegistros.c[LOW];i++)
+								{
+									Registro.i=*pEnderecoAbsoluto;
+									UART0Buffer[index_out]=Registro.c[HIGH];
+									OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+									UART0Buffer[index_out]=Registro.c[LOW];
+									OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out++]);
+									pEnderecoAbsoluto++;
+								}
+							}
+							break;
+						}
+				}
+
+
+				//crc
+				UART0Buffer[index_out]=CRCHi;
+				index_out++;
+				UART0Buffer[index_out]=CRCLo;
+
+				TamanhoDaResposta=NumeroDeRegistros.c[LOW]*2+5;
+
+				if (modelo_3g==SIM){
+					TamanhoDaResposta=NumeroDeRegistros.c[LOW]*2+5+8;
+				}
+				break;
+			}
+
+#if EQUIP!=CM_EQUIP
+		case FUNCAO_PRESET_SINGLE:
+			{
+				index++;
+				EnderecoInicial.c[HIGH]  =UART0Buffer[index]; index++;
+				EnderecoInicial.c[LOW]   =UART0Buffer[index]; index++;
+				NumeroDeRegistros.c[HIGH]=UART0Buffer[index]; index++; //usei a variavel numeroderegistros, mas na verdade o significado deste byte é data hi e lo.
+				NumeroDeRegistros.c[LOW] =UART0Buffer[index]; index++;
+				StatusDeTodosOsReles=NumeroDeRegistros.i;
+				como_remota_GDE=SIM;
+
+				if ((NumeroDeRegistros.i&0x01)==0){
+					clrLED(REL_1);} else {setLED(REL_1);}
+				if ((NumeroDeRegistros.i&0x02)==0){
+					clrLED(REL_2);} else {setLED(REL_2);}
+				if ((NumeroDeRegistros.i&0x04)==0){
+					clrLED(REL_3);} else {setLED(REL_3);}
+
+				//preparacao da resposta
+				UART0Buffer[index_out]=MeuEnderecoMODBUS;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				//	#ifdef MODELO_3G
+				if (modelo_3g==SIM){
+					UART0Buffer[index_out]=ns0;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns1;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns2;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns3;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns4;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns5;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns6;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns7;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					//#endif
+				}
+				UART0Buffer[index_out]=FUNCAO_PRESET_SINGLE;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=EnderecoInicial.c[HIGH];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=EnderecoInicial.c[LOW];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=NumeroDeRegistros.c[HIGH];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=NumeroDeRegistros.c[LOW];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				//crc
+				UART0Buffer[index_out]=CRCHi;
+				index_out++;
+				UART0Buffer[index_out]=CRCLo;
+
+				TamanhoDaResposta=8;
+				//	#ifdef MODELO_3G
+				if (modelo_3g==SIM){
+					TamanhoDaResposta=8+8;
+					//#endif
+				}
+
+				break;
+
+			}
+#endif
+		case FUNCAO_PRESET_MULT:
+			{
+
+				index++;
+				EnderecoInicial.c[HIGH]  =UART0Buffer[index]; index++;
+				EnderecoInicial.c[LOW]   =UART0Buffer[index]; index++;
+				NumeroDeRegistros.c[HIGH]=UART0Buffer[index]; index++; //deve ser zero sempre!
+				NumeroDeRegistros.c[LOW] =UART0Buffer[index]; index++;
+				ByteCount				 =UART0Buffer[index]; index++;
+			  // 	#ifdef ATUALIZ_VIA_ETH
+		//		if (modo_escritaMM==0){
+		//		#endif
+
+				if ((unsigned)(EnderecoInicial.i+NumeroDeRegistros.c[LOW])>811)
+				{
+					if ((unsigned)EnderecoInicial.i<852)
+					{
+						ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;
+					}
+				}
+				if ((unsigned)(EnderecoInicial.i+NumeroDeRegistros.c[LOW])>896){
+					ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;
+				}
+				if (NumeroDeRegistros.c[HIGH]!=0) 			{ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;}
+				if (((ByteCount/2)*2)!=ByteCount) 			{ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;}
+
+
+				pEnderecoAbsoluto=pEnderecoZero+EnderecoInicial.i;
+			//   	#ifdef ATUALIZ_VIA_ETH
+//					ModBusLiberado=SIM;
+//				}
+//				#endif
+
+
+
+
+				if (pEnderecoAbsoluto==(short *)&Versao)    		{ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;}
+
+
+				if (pEnderecoAbsoluto>((short *)&relacaoTP-4))  	{
+
+					if ((pEnderecoAbsoluto<(short *)&DiaHoraParaMedAutomatica))
+					{
+						ExceptionCodeMODBUS=ILLEGAL_DATA_ADDRESS;
+					}
+
+				}
+
+				if (pEnderecoAbsoluto==((short *)&ConstanteUsuario1)) { ExceptionCodeMODBUS=SEM_ERRO;}
+				if (pEnderecoAbsoluto==((short *)&ConstanteUsuario2)) { ExceptionCodeMODBUS=SEM_ERRO;}
+				if (pEnderecoAbsoluto==((short *)&ConstanteUsuario3)) { ExceptionCodeMODBUS=SEM_ERRO;}
+				if (pEnderecoAbsoluto==((short *)&ConstanteUsuario4)) { ExceptionCodeMODBUS=SEM_ERRO;}
+				if (pEnderecoAbsoluto==((short *)&ConstanteUsuario5)) { ExceptionCodeMODBUS=SEM_ERRO;}
+				if (pEnderecoAbsoluto==((short *)&ConstanteUsuario6)) { ExceptionCodeMODBUS=SEM_ERRO;}
+
+				#ifdef ATUALIZ_VIA_ETH
+					if (modo_escritaMM==1){
+						ModBusLiberado=SIM;
+					}
+				#endif
+
+//				#if MD4040TI==1
+				#ifdef MEMORIA_DE_MASSA_NOVA
+
+						ModBusLiberado=SIM;
+
+				#endif
+//				#endif
+
+
+				if (ModBusLiberado==SIM) { ExceptionCodeMODBUS=SEM_ERRO;}
+
+
+				//calculo do endereco absoluto no equipamento
+				if (ExceptionCodeMODBUS!=ILLEGAL_DATA_ADDRESS)
+				{
+					current_time=RTCGetTime();
+					rtc_data=RTCGetTime();
+					//ByteCount deve ser par!
+
+				/*	if EnderecoInicial.i==3
+
+#define FLASH_PAG3									 63
+#define FLASH_PAG4									 64
+#define FLASH_PAG5									 65
+#define FLASH_PAG6									 66
+#define FLASH_PAG7									 67	 */
+
+
+						#ifdef ATUALIZ_VIA_ETH
+						if ((modo_escritaMM==0) || (EnderecoInicial.i==3)){
+						#endif
+
+
+								for (i=0;i<(ByteCount/2);i++)
+								{
+									Registro.c[HIGH]=UART0Buffer[index++];
+									Registro.c[LOW] =UART0Buffer[index++];
+
+									*pEnderecoAbsoluto=Registro.i;
+									//ExceptionCodeMODBUS=ILLEGAL_DATA_VALUE; //deve ser testados os casos especias somente....
+									pEnderecoAbsoluto++;
+								}
+						#ifdef ATUALIZ_VIA_ETH
+						}
+						else
+						{
+
+							/*	for (i=0;i<1024;i++)
+								{
+									BufferMovimentacao[i]=0xA5;
+								} */
+
+								for (i=0;i<6;i++)
+								{
+									BufferMovimentacao[i]=UART0Buffer[index++];
+								}
+
+								EnderecoFLASH.c[3]=BufferMovimentacao[0];
+								EnderecoFLASH.c[2]=BufferMovimentacao[1];
+								EnderecoFLASH.c[1]=BufferMovimentacao[2];//EnderecoInicial.c[HIGH];
+								EnderecoFLASH.c[0]=BufferMovimentacao[3];//EnderecoInicial.c[LOW];
+								Registro.c[HIGH]=BufferMovimentacao[4];
+								Registro.c[LOW] =BufferMovimentacao[5];
+
+								for (i=0;i<1024;i++)
+								{
+									BufferMovimentacao[i]=UART0Buffer[index++];
+								}
+
+
+
+						 	    toogleWDI();
+
+							k=0;
+							i=1;
+						//	while (k<1000)
+							//while (i!=0)
+							{
+
+								/*
+								BufferMovimentacao[0]=1;
+								BufferMovimentacao[1]=2;
+								BufferMovimentacao[2]=3;   */
+							 	ConfigurePLL_48Mhz();
+								//ConfigurePLL_18Mhz();
+								etapa_escritaMM=EnderecoFLASH.dw;
+								i=program((void*)((long int)EnderecoFLASH.dw), (unsigned int)&BufferMovimentacao[0],1024);
+							//	i=program((void*)((long int)0x00030000), (unsigned int)&BufferMovimentacao[0],1024);
+							 	ConfigurePLL_72Mhz();
+							//	k=k+1;
+							 	//if (i==0)
+						     	//while(1);
+							}
+						//	i=program((void*)((long int)0x00030000), (unsigned int)&BufferMovimentacao[0],1024);
+
+
+							EnderecoInicial.i=(short)(EnderecoFLASH.dw>>8);
+							if (i!=0)
+								EnderecoInicial.i=0x7777;
+						    NumeroDeRegistros.i=Registro.i;
+							NumeroDeRegistros.i=BufferMovimentacao[0]; //aqui armazeno o �ltimo erro...
+
+								if (EnderecoFLASH.dw==0x00030000)
+									if (Registro.i==1024)
+									{
+										if (i==0)
+										{
+								    	//	while(1);
+										}
+									}
+
+
+
+						}
+						#endif
+
+
+
+
+			   	#ifdef ATUALIZ_VIA_ETH
+				if (modo_escritaMM==0){
+				#endif
+					AtualizaPolinomios();
+
+					//refresh_ip();  // removido FELIPE,
+
+					atualizaDevName();
+			   	#ifdef ATUALIZ_VIA_ETH
+				}
+				#endif
+				#if EQUIP==CM_EQUIP
+				    if (modoprog==0)
+				#endif
+					{
+						IPOcteto1=ip_config.IpAdr[0];           // Local IP Address
+						IPOcteto2=ip_config.IpAdr[1];           // Local IP Address
+						IPOcteto3=ip_config.IpAdr[2];           // Local IP Address
+						IPOcteto4=ip_config.IpAdr[3];           // Local IP Address
+						GWOcteto1=ip_config.DefGW[0];           // Default GateWay
+						GWOcteto2=ip_config.DefGW[1];           // Default GateWay
+						GWOcteto3=ip_config.DefGW[2];           // Default GateWay
+						GWOcteto4=ip_config.DefGW[3];           // Default GateWay
+						MKOcteto1=ip_config.NetMask[0];         // Net Mask
+						MKOcteto2=ip_config.NetMask[1];         // Net Mask
+						MKOcteto3=ip_config.NetMask[2];         // Net Mask
+						MKOcteto4=ip_config.NetMask[3];         // Net Mask
+						NroPorta=NroPorta2;
+					//	#if CP40==1
+						localm[NETIF_ETH].IpAdr[0] = ip_config.IpAdr[0];
+						localm[NETIF_ETH].IpAdr[1] = ip_config.IpAdr[1];
+						localm[NETIF_ETH].IpAdr[2] = ip_config.IpAdr[2];
+						localm[NETIF_ETH].IpAdr[3] = ip_config.IpAdr[3];
+						localm[NETIF_ETH].DefGW[0] = ip_config.DefGW[0];
+						localm[NETIF_ETH].DefGW[1] = ip_config.DefGW[1];
+						localm[NETIF_ETH].DefGW[2] = ip_config.DefGW[2];
+						localm[NETIF_ETH].DefGW[3] = ip_config.DefGW[3];
+						localm[NETIF_ETH].NetMask[0] = ip_config.NetMask[0];
+						localm[NETIF_ETH].NetMask[1] = ip_config.NetMask[1];
+						localm[NETIF_ETH].NetMask[2] = ip_config.NetMask[2];
+						localm[NETIF_ETH].NetMask[3] = ip_config.NetMask[3];
+
+						refresh_ip();  // inserido por Cesar para ST
+					//	#endif
+					}
+
+
+#if EQUIP==CM_EQUIP
+					if (modoprog==0)
+					{
+						tptc.tptc_i=relacaoTPpri;
+						StatusFuncaoFinal[38]=tptc.tptc_c[1];
+						StatusFuncaoFinal[37]=tptc.tptc_c[0];
+						tptc.tptc_i=relacaoTPsec;
+						StatusFuncaoFinal[40]=tptc.tptc_c[1];
+						StatusFuncaoFinal[39]=tptc.tptc_c[0];
+						tptc.tptc_i=relacaoTCpri;
+						StatusFuncaoFinal[42]=tptc.tptc_c[1];
+						StatusFuncaoFinal[41]=tptc.tptc_c[0];
+						tptc.tptc_i=relacaoTCsec;
+						StatusFuncaoFinal[44]=tptc.tptc_c[1];
+						StatusFuncaoFinal[43]=tptc.tptc_c[0];
+
+						StatusFuncaoFinal[46]=HorarioSemAtuarInicio &0xFF;
+						StatusFuncaoFinal[47]=(HorarioSemAtuarInicio>>8)&0xFF;
+						StatusFuncaoFinal[48]=HorarioSemAtuarFim &0xFF ;
+						StatusFuncaoFinal[49]=(HorarioSemAtuarFim>>8)&0xFF;
+					}
+
+					//StatusFuncaoFinal[44]=tptc.tptc_c[1];
+					//StatusFuncaoFinal[43]=tptc.tptc_c[0];
+
+
+#else
+
+#endif
+			   	#ifdef ATUALIZ_VIA_ETH
+				if (modo_escritaMM==0){
+				#endif
+					SalvaParametrizacao();
+			   	#ifdef ATUALIZ_VIA_ETH
+				}
+				#endif
+
+					if((current_time.RTC_Hour!=rtc_data.RTC_Hour) ||
+					 (current_time.RTC_Mday!=rtc_data.RTC_Mday)	  ||
+					 (current_time.RTC_Wday!=rtc_data.RTC_Wday)	  ||
+					 (current_time.RTC_Yday!=rtc_data.RTC_Yday)	  ||
+					 (current_time.RTC_Mon !=rtc_data.RTC_Mon )	  ||
+					 (current_time.RTC_Year!=rtc_data.RTC_Year))
+					 {
+				//ao alterar o rel�gio, tudo o conte�do da MM e batram � apagado!
+							toogleWDI();
+							ClearBatteryRam();
+							RegistroCabecalho2K.id=REG_BATT_MEM_INIT;
+							RegistroCabecalho2K.ProximoEnderecoAserEscritoNaFlash=SETOR_MM_INICIO;
+							RegistroCabecalho2K.ProximoEnderecoAserApagadoNaFlash=SETOR_MM_INICIO;
+							RegistroCabecalho2K.ProximoEnderecoAserEscritoNaBattRam=RTC_RAM_BASE_ADDR+((DWORD)&RegistroCabecalho2K.NextPos)-((DWORD)&RegistroCabecalho2K.id);
+							RegistroCabecalho2K.FlagProximoRegistroSeraComRTC=SIM;
+							toogleWDI();
+							erase((void*)SETOR_MM_INICIO,(void*)SETOR_MM_FIM);
+							toogleWDI();
+					 }
+
+
+					if (current_time.RTC_Min !=rtc_data.RTC_Min ) { RTCSetTime(rtc_data);
+						JaRegistrouNoIntervalode15Min=NAO;	}
+
+						if (current_time.RTC_Hour!=rtc_data.RTC_Hour) { RTCSetTime(rtc_data); }
+						if (current_time.RTC_Mday!=rtc_data.RTC_Mday) { RTCSetTime(rtc_data); }
+						if (current_time.RTC_Wday!=rtc_data.RTC_Wday) { RTCSetTime(rtc_data);}
+						if (current_time.RTC_Yday!=rtc_data.RTC_Yday) { RTCSetTime(rtc_data);}
+						if (current_time.RTC_Mon !=rtc_data.RTC_Mon ) { RTCSetTime(rtc_data);}
+						if (current_time.RTC_Year!=rtc_data.RTC_Year) { RTCSetTime(rtc_data);}
+				}
+				//preparacao da resposta
+				UART0Buffer[index_out]=MeuEnderecoMODBUS;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				//	#ifdef MODELO_3G
+				if (modelo_3g==SIM){
+					UART0Buffer[index_out]=ns0;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns1;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns2;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns3;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns4;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns5;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns6;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					UART0Buffer[index_out]=ns7;
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+					//#endif
+				}
+				UART0Buffer[index_out]=FUNCAO_PRESET_MULT;
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=EnderecoInicial.c[HIGH];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=EnderecoInicial.c[LOW];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=NumeroDeRegistros.c[HIGH];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				UART0Buffer[index_out]=NumeroDeRegistros.c[LOW];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+				//crc
+				UART0Buffer[index_out]=CRCHi;
+				index_out++;
+				UART0Buffer[index_out]=CRCLo;
+
+				TamanhoDaResposta=8;
+				//	#ifdef MODELO_3G
+				if (modelo_3g==SIM){
+					TamanhoDaResposta=8+8;
+					//#endif
+				}
+
+				break;
+			}
+	}
+
+	if (ExceptionCodeMODBUS!=SEM_ERRO)
+	{
+		OldCrc=0xFFFF;
+		index_out=0;
+		UART0Buffer[index_out]=MeuEnderecoMODBUS;
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+		UART0Buffer[index_out]=FuncaoSolicitada|0x80;
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+		UART0Buffer[index_out]=ExceptionCodeMODBUS;
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index_out]); index_out++;
+		//crc
+		UART0Buffer[index_out]=CRCHi;
+		index_out++;
+		UART0Buffer[index_out]=CRCLo;
+		TamanhoDaResposta=6;
+	}
+#if HABSERFIXO==NAO
+	SETpinoEmPorta(0,HABSER_PIN);  // (desabilita recepcao...)
+#endif
+
+	for (t=0;t<10000;t++);
+	UARTSend((BYTE *)&UART0Buffer,TamanhoDaResposta);
+
+	for (t=0;t<20;t++);
+	for (t=0;t<20;t++);
+#if HABSERFIXO==NAO
+	CLRpinoEmPorta(0,HABSER_PIN);  // (habilita recepcao...)
+#endif
+	ExceptionCodeMODBUS=SEM_ERRO;
+	HabResponder=OFF;
+
+	/*somente no final apos a transmissão, serão executas as funções
+	  remotas solicitadas pelo mestre*/
+
+	AvaliaFuncaoRemota();
+
+	if (RegistroCabecalho2K.TempoDeIntegracaoGrandezas!=tMMgrandezas)
+	{
+		GravaNaBatteryRAM(REG_BATT_MEM_ALT_CONFIG);
+	}
+
+
+}
+
+void AnalizaBufferPR4000()
+{
+	BYTE FuncaoSolicitada;
+	BYTE tcrc;
+	short i,index=0;
+	BOOL CRCok;
+	OldCrc=0xFFFF;
+	OldCrc=CalcCRC(OldCrc,0); //endereço zero!, "broadcast"!!
+
+	eCOMIGOeCOMTODOS=eCOMNINGUEM;
+
+	if (UART0Buffer[index]==nserie_str[0])
+	{
+		if (UART0Buffer[index+1]==nserie_str[1])
+		{
+			if (UART0Buffer[index+2]==nserie_str[2])
+			{
+				if (UART0Buffer[index+3]==nserie_str[3])
+				{
+					if (UART0Buffer[index+4]==nserie_str[4])
+					{
+						if (UART0Buffer[index+5]==nserie_str[5])
+						{
+							if (UART0Buffer[index+6]==nserie_str[6])
+							{
+								if (UART0Buffer[index+7]==nserie_str[7])
+								{
+									eCOMIGOeCOMTODOS=eCOMIGO;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (UART0Buffer[index]==0)
+	{
+		if (UART0Buffer[index+1]==0)
+		{
+			if (UART0Buffer[index+2]==0)
+			{
+				if (UART0Buffer[index+3]==0)
+				{
+					if (UART0Buffer[index+4]==0)
+					{
+						if (UART0Buffer[index+5]==0)
+						{
+							if (UART0Buffer[index+6]==0)
+							{
+								if (UART0Buffer[index+7]==0)
+								{
+									eCOMIGOeCOMTODOS=eCOMTODOS;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if 	((eCOMIGOeCOMTODOS==eCOMTODOS)||(eCOMIGOeCOMTODOS==eCOMIGO))
+	{
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 0
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 1
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 2
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 3
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 4
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 5
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 6
+		OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++; //ns 7
+
+		FuncaoSolicitada=UART0Buffer[index];
+		OldCrc=CalcCRC(OldCrc,FuncaoSolicitada); index++;
+
+		switch (FuncaoSolicitada) //0:leitura 		1:escrita
+		{
+			case 0:
+				{
+					//CRC Swapping
+					tcrc=UART0Buffer[index+1];
+					UART0Buffer[index+1]=UART0Buffer[index];
+					UART0Buffer[index]=tcrc;
+
+					CRCok=ComparaCRC(index);
+					break;
+				}
+			case 1:
+				{
+
+					for (i=0;i<(141-8);i++) //bytecount=141-8
+						OldCrc=CalcCRC(OldCrc,UART0Buffer[index++]);
+
+					//CRC Swapping
+					tcrc=UART0Buffer[index+1];
+					UART0Buffer[index+1]=UART0Buffer[index];
+					UART0Buffer[index]=tcrc;
+
+					CRCok=ComparaCRC(index);
+					break;
+				}
+		}
+	}
+	else
+	{
+		CRCok=NAO; //force to exit.
+	}
+
+	if (CRCok || (modbus_msg_protocol == THRU_TCP)) {
+		HabResponderPR4000=ON;
+		SETpinoEmPorta(0,HABSER_PIN); ;  // (desabilita recepcao...)
+	}
+	else
+	{
+		HabResponderPR4000=OFF;
+
+		CLRpinoEmPorta(0,HABSER_PIN); // (rehabilita recepcao...)
+
+	}
+}
+
+void AnalizaBufferMODBUS_MASTER()
+{
+	BYTE FuncaoSolicitada,bytecount;
+	short index=0;
+	long int data,datah,datal;
+	static float dado1,dado2;
+	short dadoi1,dadoi2;
+	FuncaoSolicitada=UART0Buffer[index]; index++;
+	bytecount=UART0Buffer[index]; index++; //bytecount
+
+#if MD4040TI==1
+ 	switch (FuncaoSolicitada)
+	{
+	  case FUNCAO_READ_HOLD:
+			{
+
+				if((StatusFuncaoFinal[1])==0)
+				{
+					datah=UART0Buffer[index]; index++; //datah
+					datal=UART0Buffer[index]; index++; //bytel
+					data=(datah<<8)+datal;
+
+					dado1=(float)data;  //temperatura
+
+
+					datah=UART0Buffer[index]; index++; //datah
+					datal=UART0Buffer[index]; index++; //bytel
+					data=(datah<<8)+datal;
+					dado2=(float)data;	//humidade
+
+
+#ifdef  MODELO_S501
+
+					dadoi1=(short)dado1/10;
+					dadoi2=(short)dado2/10;
+					MMFp_copy=(float)((float)dadoi1*1000.0+ dadoi2);  //temperatura*1000+humidade!!!
+#else
+					MMFp_copy=(float)(dado1*1000+ dado2);  //temperatura*1000+humidade!!!
+#endif
+
+					MMFp=MMFp_copy;
+				}
+				else
+				{
+					 if (MMFp3Acc==0.0)
+					 {
+						datah=UART0Buffer[index]; index++; //datah
+						datal=UART0Buffer[index]; index++; //bytel
+						data=(datah<<8)+datal;
+	 				  	dado1=(float)data;  //temperatura
+					 }
+				     if (MMFp3Acc==1.00)
+					 {
+					  	datah=UART0Buffer[index]; index++; //datah
+					  	datal=UART0Buffer[index]; index++; //bytel
+					  	data=(datah<<8)+datal;
+					  	dado2=(float)data;  //temperatura
+#ifdef  MODELO_S501
+
+						dadoi1=(short)dado1/10;
+						dadoi2=(short)dado2/10;
+					 	MMFp_copy=(float)((float)dadoi1*1000.0+ dadoi2);  //temperatura*1000+humidade!!!
+#else
+					 	MMFp_copy=(float)(dado1*1000+ dado2);  //temperatura*1000+humidade!!!
+#endif
+
+					  	MMFp=MMFp_copy;
+					 }
+				}
+
+				MMFp3Acc=MMFp3Acc+1.0;
+				break;
+			}
+	  default:
+	  		{
+				 MMFp=MMFp_copy;
+ 				 break;
+			}
+	}
+#endif;
+}
+
+void AnalizaBufferMODBUS()
+{
+	BYTE FuncaoSolicitada,ByteCount;
+	short i,index=0;
+	BOOL CRCok;
+	OldCrc=0xFFFF;
+	OldCrc=CalcCRC(OldCrc,MeuEnderecoMODBUS);
+	if (modelo_3g==SIM){
+		OldCrc=CalcCRC(OldCrc,ns0);
+		OldCrc=CalcCRC(OldCrc,ns1);
+		OldCrc=CalcCRC(OldCrc,ns2);
+		OldCrc=CalcCRC(OldCrc,ns3);
+		OldCrc=CalcCRC(OldCrc,ns4);
+		OldCrc=CalcCRC(OldCrc,ns5);
+		OldCrc=CalcCRC(OldCrc,ns6);
+		OldCrc=CalcCRC(OldCrc,ns7);
+	}
+	FuncaoSolicitada=UART0Buffer[index];
+	OldCrc=CalcCRC(OldCrc,FuncaoSolicitada); index++;
+
+	switch (FuncaoSolicitada)
+	{
+		case FUNCAO_SLAVE_ID:
+			{
+				CRCok=ComparaCRC(index);
+
+				break;
+			}
+
+		case FUNCAO_READ_HOLD:
+			{
+				//EnderecoInicial.c[HIGH]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//EnderecoInicial.c[LOW]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//NumeroDeRegistros.c[HIGH]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//NumeroDeRegistros.c[LOW]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				CRCok=ComparaCRC(index);
+				break;
+			}
+
+			//06 ( write single register)
+#if EQUIP!=CM_EQUIP
+		case FUNCAO_PRESET_SINGLE:
+			{
+				//endereço hi
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//endereço lo
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//dado hi
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//dado lo
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+
+				CRCok=ComparaCRC(index);
+				break;
+
+			}
+#endif
+
+		case FUNCAO_PRESET_MULT:
+			{
+				//EnderecoInicial.c[HIGH]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//EnderecoInicial.c[LOW]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//NumeroDeRegistros.c[HIGH]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				//NumeroDeRegistros.c[LOW]=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,UART0Buffer[index]); index++;
+				ByteCount=UART0Buffer[index];
+				OldCrc=CalcCRC(OldCrc,ByteCount); index++;
+
+				for (i=0;i<ByteCount;i++)
+					OldCrc=CalcCRC(OldCrc,UART0Buffer[index++]);
+
+				CRCok=ComparaCRC(index);
+				#ifdef ATUALIZ_VIA_ETH
+					if (modo_escritaMM==1){
+					CRCok=OK;
+					}
+				#endif
+				break;
+			}
+		default:
+			{
+				//ERRO, FUNCAO NAO RECONHECIDA
+				ExceptionCodeMODBUS=ILLEGAL_FUNCTION;
+				CRCok=OFF; //Forçamos temporariamente a uma saída...
+				break;
+			}
+	}
+
+	if (CRCok || (modbus_msg_protocol == THRU_TCP))
+	{
+		HabResponder=ON;
+#if HABSERFIXO==NAO
+
+		SETpinoEmPorta(0,HABSER_PIN); // (desabilita recepcao...)
+
+
+#endif
+	}
+	else
+	{
+		HabResponder=OFF;
+#if HABSERFIXO==NAO
+		CLRpinoEmPorta(0,HABSER_PIN);   // (rehabilita recepcao...)
+#endif
+	}
+
+}
+
+BOOL ComparaCRC(short index)
+{
+	BOOL res;
+	res=nOK;
+
+	if (CRCHi==UART0Buffer[index])
+	{
+		index++;
+		if (CRCLo==UART0Buffer[index])
+		{
+			index++;
+			res=OK;
+		}
+	}
+	return(res);
+}
+
+void AvaliaFuncaoRemota()
+{
+	DWORD *pDW;
+	switch (FuncaoRemota)
+	{
+		case FUNC_REMOTA_DEFAULT:
+			{
+				break;
+			}
+
+		case FUNC_REMOTA_APAGA_TOTAIS_ABSOLUTOS:	   //Apaga Consumos	Totais Absolutos
+			{
+				ConsumoT=0;ConsumoA=0;ConsumoB=0;ConsumoC=0;
+				EnergGerT=0;EnergGerA=0;EnergGerB=0;EnergGerC=0;
+				EnergIndT=0;EnergIndA=0;EnergIndB=0;EnergIndC=0;
+				EnergCapT=0; EnergCapA=0;EnergCapB=0;EnergCapC=0;
+//Variaveis int64 de calc de Consumo e Energias s�o zeradas durante FUN�AO REMOTA APAGAR
+// Add by CCT
+				EnergGerT_int64=0; EnergGerA_int64=0; EnergGerB_int64=0; EnergGerC_int64=0;
+				ConsumoT_int64=0;  ConsumoA_int64=0;  ConsumoB_int64=0;  ConsumoC_int64=0;
+				EnergIndT_int64=0; EnergIndA_int64=0; EnergIndB_int64=0; EnergIndC_int64=0;
+				EnergCapT_int64=0; EnergCapA_int64=0; EnergCapB_int64=0; EnergCapC_int64=0;
+
+#if CP40==1
+				pulso_cp_1	=0;
+				pulso_cp_2	=0;
+				pulso_cp_3	=0;
+				pulso_cp_4	=0;
+#endif
+				break;
+			}
+		case FUNC_REMOTA_BLOQUEIO_TECLADO_OFF:
+			{
+#if (ENCHE_MM==SIM)
+				BateriaMorta = SIM;
+#endif
+				BloqueioTeclado=OFF;
+				break;
+			}
+		case FUNC_REMOTA_BLOQUEIO_TECLADO_ON:
+			{
+				BloqueioTeclado=ON;
+				break;
+			}
+		case FUNC_REMOTA_RELE_ON:	  //ON rele
+			{
+
+#ifndef REVISAO_D
+				ConfigurePLL_18Mhz();
+#endif
+				ClearBatteryRam();
+				RegistroCabecalho2K.id=REG_BATT_MEM_INIT;
+				RegistroCabecalho2K.ProximoEnderecoAserEscritoNaFlash=SETOR_MM_INICIO;
+				RegistroCabecalho2K.ProximoEnderecoAserApagadoNaFlash=SETOR_MM_INICIO;
+				RegistroCabecalho2K.ProximoEnderecoAserEscritoNaBattRam=RTC_RAM_BASE_ADDR+((DWORD)&RegistroCabecalho2K.NextPos)-((DWORD)&RegistroCabecalho2K.id);
+				RegistroCabecalho2K.FlagProximoRegistroSeraComRTC=SIM;
+				pDW=(DWORD *)RegistroCabecalho2K.ProximoEnderecoAserEscritoNaBattRam;
+				*pDW=0xFFFFFFFF;
+				toogleWDI();
+				erase((void*)SETOR_MM_INICIO,(void*)SETOR_MM_FIM);	  //apaga tudo o setor de "Memoria de Masa"
+				toogleWDI();
+#ifndef REVISAO_D
+				ConfigurePLL_72Mhz();
+#endif
+				break;
+			}
+		case FUNC_REMOTA_RELE_OFF:	  //OFF rele
+			{
+				break;
+			}
+
+		case FUNC_REMOTA_APAGA_TOTAIS_HORARIOS:	  //Apaga Demandas e Consumos horarios
+			{
+				Zera15min();
+				Zera15minAcc();
+				ZeraVariaveisDeHoje();
+				ZeraMesPassado();
+				//versão x.13 - a unica forma de zerar as medidas horarias do mes até agora é assim:
+				EnergGerPontaEsteMesAteAgora		=0;
+				EnergGerForaPontaEsteMesAteAgora	=0;
+				EnergGerReservEsteMesAteAgora 		=0;
+				ConsumoPontaEsteMesAteAgora			=0;
+				ConsumoForaPontaEsteMesAteAgora		=0;
+				ConsumoReservEsteMesAteAgora 		=0;
+				EnergIndPontaEsteMesAteAgora		=0;
+				EnergIndForaPontaEsteMesAteAgora	=0;
+				EnergIndReservEsteMesAteAgora 		=0;
+				EnergCapPontaEsteMesAteAgora		=0;
+				EnergCapForaPontaEsteMesAteAgora	=0;
+				EnergCapReservEsteMesAteAgora  		=0;
+
+				ZeraEsteMesAteAgora();
+				ZeraTotaisHorarios();
+				JaRegistrouNoIntervalode15Min=NAO;
+				break;
+			}
+		case FUNC_REMOTA_CICLAR_TELAS:
+			{
+				CiclarTelas=ON;
+				break;
+			}
+		case FUNC_REMOTA_MEDICAO_CONCESSIONARIA:	  //Indica que foi feita uma leitura da consecionaria
+			{
+				//falta zerar também as variaveis hoje, ate agora... e outras mais..
+				TrocaDeMes();
+				ZeraEsteMesAteAgora();
+				LeituraConcessionariaSolicitada=ON;
+
+				break;
+			}
+		case FUNC_REMOTA_FORCE_POWERDOWN:	  //Indica que foi feita uma leitura da consecionaria
+			{
+				PowerDown();
+			}
+		case FUNC_REMOTA_SEM_HARMONICAS:	  //Indica que foi feita uma leitura da consecionaria
+			{
+#if EQUIP!=CM_EQUIP
+				SoConsideraFundamental=SIM;
+#endif
+				break;
+			}
+		case FUNC_REMOTA_COM_HARMONICAS:	  //Indica que foi feita uma leitura da consecionaria
+			{
+#if EQUIP!=CM_EQUIP
+				SoConsideraFundamental=NAO;
+#endif
+				break;
+			}
+		case FUNC_REMOTA_ZERAED1:	  //Indica que foi feita uma leitura da consecionaria
+			{
+#if EQUIP!=CM_EQUIP
+				pulso1=0;
+#endif
+				break;
+			}
+		case FUNC_REMOTA_ZERAED2:	  //Indica que foi feita uma leitura da consecionaria
+			{
+#if EQUIP!=CM_EQUIP
+				pulso2=0;
+#endif
+				break;
+			}
+
+		default:
+			{
+				break;
+			}
+	}	 //fim do switch
+
+	FuncaoRemota=DEFAULT;
+
+	switch (FuncaoRemota1)
+	{
+		//INICIALIZA A MM E ZERA A BATRAM, AGORA � POSS�VEL ESCREVER NA mm
+		case INIT_MM_BATT_RAM:
+			{
+
+			    RegistroCabecalho2K.id = ~REG_BATT_MEM_INIT;
+				InitBatteryRam();
+				modo_escritaMM=1;
+				break;
+			}
+
+		case FLASH_PAG3:
+			{
+
+			    pagina=3;
+				break;
+			}
+		case FLASH_PAG4:
+			{
+
+			    pagina=4;
+				break;
+			}
+		case FLASH_PAG5:
+			{
+
+			    pagina=5;
+				break;
+			}
+		case FLASH_PAG6:
+			{
+
+			    pagina=6;
+				break;
+			}
+		case FLASH_PAG7:
+			{
+
+			    pagina=7;
+				break;
+			}
+
+		case DEFAULT: //A leitura e escrita poderao ser realizadas no buffer de comuncacao padrao
+			{
+				break;
+			}
+
+		case LINEARIZA_SO_TP:
+			{
+				LinearizaSoTP=SIM;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case READ_NORMAL_MODBUS:
+			{
+				TipodeLeituraModbus= NORMAL_MODBUS;
+				ModBusLiberado=NAO;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}case READ_FLASH:
+			{
+				TipodeLeituraModbus= READ_FLASH;
+
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case READ_FLASH1:
+			{
+				TipodeLeituraModbus= READ_FLASH1;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case READ_FLASH2:
+			{
+				TipodeLeituraModbus= READ_FLASH2;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case READ_FLASH3:
+			{
+				TipodeLeituraModbus= READ_FLASH3;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case READ_FLASH4:
+			{
+				TipodeLeituraModbus= READ_FLASH4;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case READ_FLASH5:
+			{
+				TipodeLeituraModbus= READ_FLASH5;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case FULL_RAM:
+			{
+				TipodeLeituraModbus= FULL_RAM;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case MODBUS_LIBERADO:
+			{
+				ModBusLiberado=SIM;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case CALIBRA_AC_AGORA_E_GRAVA_CALIBRACAO:
+			{
+				EquipamentoCalibrado=NAO;
+				ModBusLiberado=SIM;
+				HabCapator=OFF;
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				IniciaParametrosCalibracaoDefault();
+				nivelDCUa=0;
+				nivelDCUb=0;
+				nivelDCUc=0;
+				nivelDCIa=0;
+				nivelDCIb=0;
+				nivelDCIc=0;
+				CalibraAgora=SIM;
+				CalibrarTensao  =SIM;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				polinomioModuloIa[0]=polinomioMIa[0];
+				polinomioModuloIa[1]=polinomioMIa[1];
+				polinomioModuloIa[2]=polinomioMIa[2];
+
+				polinomioModuloIb[0]=polinomioMIb[0];
+				polinomioModuloIb[1]=polinomioMIb[1];
+				polinomioModuloIb[2]=polinomioMIb[2];
+
+				polinomioModuloIc[0]=polinomioMIc[0];
+				polinomioModuloIc[1]=polinomioMIc[1];
+				polinomioModuloIc[2]=polinomioMIc[2];
+
+				break;
+			}
+		case CALIBRA_CORRENTE_A:
+			{
+				EquipamentoCalibrado=NAO;
+				HabCapator=OFF;
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				CalibraAgora=SIM;
+				CalibrarTensao  =OFF;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case CALIBRA_CORRENTE_A_LIN0:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIA[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				polMa=0;
+				polinomioModuloIa[0]=0.0;
+				polinomioModuloIa[1]=0.0;
+				polinomioModuloIa[2]=1.0;
+				polinomioModuloIa[3]=0.0;
+				break;
+			}
+
+		case CALIBRA_CORRENTE_A_LIN1:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIA[3]=0.0;
+				CalibraAgora=11;
+				polMa=1;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				polinomioModuloIa[0]=polinomioMIa[0];
+				polinomioModuloIa[1]=polinomioMIa[1];
+				polinomioModuloIa[2]=polinomioMIa[2];
+				polinomioModuloIa[3]=polinomioMIa[3];
+				break;
+			}
+
+		case CALIBRA_CORRENTE_A_LIN2:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIA[3]=0.0;
+				CalibraAgora=11;
+				polMa=2;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				polinomioModuloIa[0]=polinomioMIb[0];
+				polinomioModuloIa[1]=polinomioMIb[1];
+				polinomioModuloIa[2]=polinomioMIb[2];
+				polinomioModuloIa[3]=polinomioMIb[3];
+				break;
+			}
+
+
+		case CALIBRA_CORRENTE_A_LIN3:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIA[3]=0.0;
+				CalibraAgora=11;
+				polMa=3;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				polinomioModuloIa[0]=polinomioMIc[0];
+				polinomioModuloIa[1]=polinomioMIc[1];
+				polinomioModuloIa[2]=polinomioMIc[2];
+				polinomioModuloIa[3]=polinomioMIc[3];
+				break;
+			}
+
+
+		case CALIBRA_CORRENTE_B:
+			{
+				EquipamentoCalibrado=NAO;
+				HabCapator=OFF;
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				CalibraAgora=SIM;
+				CalibrarTensao  =OFF;
+				CalibrarCorrente=CALIBRA_CORRENTE_B;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case CALIBRA_CORRENTE_B_LIN0:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIB[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_B;
+				FuncaoRemota1=DEFAULT;
+				polMb=0;
+				polinomioModuloIb[0]=0.0;
+				polinomioModuloIb[1]=0.0;
+				polinomioModuloIb[2]=1.0;
+				polinomioModuloIb[3]=0.0;
+				break;
+			}
+
+		case CALIBRA_CORRENTE_B_LIN1:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIB[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_B;
+				polMb=1;
+				FuncaoRemota1=DEFAULT;
+				polinomioModuloIb[0]=polinomioMIa[0];
+				polinomioModuloIb[1]=polinomioMIa[1];
+				polinomioModuloIb[2]=polinomioMIa[2];
+				polinomioModuloIb[3]=polinomioMIa[3];
+				break;
+			}
+
+		case CALIBRA_CORRENTE_B_LIN2:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIB[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_B;
+				FuncaoRemota1=DEFAULT;
+				polMb=2;
+				polinomioModuloIb[0]=polinomioMIb[0];
+				polinomioModuloIb[1]=polinomioMIb[1];
+				polinomioModuloIb[2]=polinomioMIb[2];
+				polinomioModuloIb[3]=polinomioMIb[3];
+				break;
+			}
+
+
+		case CALIBRA_CORRENTE_B_LIN3:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIB[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_B;
+				FuncaoRemota1=DEFAULT;
+				polMb=3;
+				polinomioModuloIb[0]=polinomioMIc[0];
+				polinomioModuloIb[1]=polinomioMIc[1];
+				polinomioModuloIb[2]=polinomioMIc[2];
+				polinomioModuloIb[3]=polinomioMIc[3];
+				break;
+			}
+		case CALIBRA_CORRENTE_C:
+			{
+				EquipamentoCalibrado=NAO;
+				HabCapator=OFF;
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				CalibraAgora=SIM;
+				CalibrarTensao  =OFF;
+				CalibrarCorrente=CALIBRA_CORRENTE_C;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case CALIBRA_CORRENTE_C_LIN0:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIC[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_C;
+				FuncaoRemota1=DEFAULT;
+				polMc=0;
+				polinomioModuloIc[0]=0.0;
+				polinomioModuloIc[1]=0.0;
+				polinomioModuloIc[2]=1.0;
+				polinomioModuloIc[3]=0.0;
+				break;
+			}
+		case CALIBRA_CORRENTE_C_LIN1:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIC[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_C;
+				FuncaoRemota1=DEFAULT;
+				polMc=1;
+				polinomioModuloIc[0]=polinomioMIa[0];
+				polinomioModuloIc[1]=polinomioMIa[1];
+				polinomioModuloIc[2]=polinomioMIa[2];
+				polinomioModuloIc[3]=polinomioMIa[3];
+				break;
+			}
+		case CALIBRA_CORRENTE_C_LIN2:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIC[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_C;
+				polMc=2;
+				FuncaoRemota1=DEFAULT;
+				polinomioModuloIc[0]=polinomioMIb[0];
+				polinomioModuloIc[1]=polinomioMIb[1];
+				polinomioModuloIc[2]=polinomioMIb[2];
+				polinomioModuloIc[3]=polinomioMIb[3];
+				break;
+			}
+		case CALIBRA_CORRENTE_C_LIN3:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIC[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_C;
+				FuncaoRemota1=DEFAULT;
+				polMc=3;
+				polinomioModuloIc[0]=polinomioMIc[0];
+				polinomioModuloIc[1]=polinomioMIc[1];
+				polinomioModuloIc[2]=polinomioMIc[2];
+				polinomioModuloIc[3]=polinomioMIc[3];
+				break;
+			}
+		case CALIBRA_EM_MEIO_AMPERE_A:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIA[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_A;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case CALIBRA_EM_MEIO_AMPERE_B:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIB[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_B;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case CALIBRA_EM_MEIO_AMPERE_C:
+			{
+				relacaoTC=1; //temporariamente fica 1 pra 1
+				relacaoTP=1; //temporariamente fica 1 pra 1
+				polinomioIC[3]=0.0;
+				CalibraAgora=11;
+				CalibrarCorrente=CALIBRA_CORRENTE_C;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case FINALIZA_CALIBRACAO:
+			{
+				EquipamentoCalibrado=SIM;
+
+				toogleWDI();
+#ifndef REVISAO_D
+				ConfigurePLL_18Mhz();
+#endif
+				erase((void*)SETOR_CALIBRACAO_INICIO,(void*)SETOR_CALIBRACAO_FIM);	  //apaga um setor de 4Kbytes
+				toogleWDI();
+				program((void*)SETOR_CALIBRACAO_INICIO, (unsigned int)&FatorCalibUa,256);
+				toogleWDI();
+				//
+				SalvaParametrizacao();//Chama para gravar o parametro 'EquipamentoCalibrado'
+
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case RESETA_SISTEMA:
+			{
+				DisableAllInterrupts();
+				forceReset();
+				//		break;
+			}
+
+		case BOOTLOADER:
+			{
+				/*
+				Antes de ir no modo bootloader, deve ser testado se o que foi copiado na flash, est� livre de erro
+				*/
+					unsigned long int c;
+
+					BYTE const  *pFlashByte;
+					U64 LRC=0;
+					c=SETOR_MM_INICIO;
+				    pFlashByte=(const 	BYTE*)SETOR_MM_INICIO;
+					toogleWDI();
+
+					while(c<=SETOR_MM_FIM)
+					{
+						LRC=LRC+*pFlashByte;
+						pFlashByte++;
+						c++;
+					}
+					toogleWDI();
+					if ((U64)LRC!=(U64)flashLRC)
+					{
+//						flashLRC=0xABCDABCD; //sinal que houve falha
+//						break;
+						flashLRC=LRC;
+
+					}
+
+
+
+
+
+				//RegistroCabecalho2K.id=0xABCD; //s� funciona com equip com Bateria!!
+				BattRam1.id=0xABCD;
+				DisableAllInterrupts();
+			    gotoBootLoader();
+			    forceReset();
+				//PowerDown();
+			}
+
+		case FATORESNOVOS:
+			{
+				program((void*)SETOR_CALIBRACAO_INICIO, (unsigned int)&FatorCalibUa,256);
+				toogleWDI();
+				break;
+			}
+		case FATORESNOVOS2:
+			{
+				program((void*)(SETOR_CALIBRACAO_INICIO+256), (unsigned int)&FatorCalibUa,256);
+				toogleWDI();
+				break;
+			}
+
+		case APAGA_ULTIMOS_SETORES:
+			{
+#ifndef REVISAO_D
+				ConfigurePLL_18Mhz();
+#endif
+				erase((void*)SETOR_CALIBRACAO_INICIO,(void*)SETOR_CALIBRACAO_FIM);
+				erase((void*)SETOR_PARAMETRIZACAO_INICIO,(void*)SETOR_PARAMETRIZACAO_FIM);
+				erase((void*)SETOR_DADOS1_INICIO,(void*)SETOR_DADOS1_FIM);
+				erase((void*)SETOR_DADOS2_INICIO,(void*)SETOR_DADOS2_FIM);
+#ifndef REVISAO_D
+				ConfigurePLL_72Mhz();
+#endif
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case ATUALIZA_POLINOMIOS:
+			{
+				AtualizaPolinomios();
+				toogleWDI();
+#ifndef REVISAO_D
+				ConfigurePLL_18Mhz();
+#endif
+				erase((void*)SETOR_CALIBRACAO_INICIO,(void*)SETOR_CALIBRACAO_FIM);	  //apaga um setor de 4Kbytes
+				toogleWDI();
+				program((void*)SETOR_CALIBRACAO_INICIO, (unsigned int)&FatorCalibUa,256);
+#ifndef REVISAO_D
+				ConfigurePLL_72Mhz();
+#endif
+				toogleWDI();
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case HABILITA_MEDICAO_FREQUENCIA:
+			{
+			    #ifdef LEGADO
+				T0TCR = 1;
+				T0CTCR=0;
+				T0CR0=0x51;
+				T0CCR=0x6;
+				#endif
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case MEDE_NIVEL_DC:
+			{
+				Hab_LeituraMedios=1;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case ESCREVE_FATORES_DE_CALIBRACAO:
+			{
+				FatorCalibUa=UrmsAforCalib/UrmsA;
+				FatorCalibUb=UrmsBforCalib/UrmsB;
+				FatorCalibUc=UrmsCforCalib/UrmsC;
+				FatorCalibIa=IrmsAforCalib/IrmsA;
+				FatorCalibIb=IrmsBforCalib/IrmsB;
+				FatorCalibIc=IrmsCforCalib/IrmsC;
+				FatorCalibUa_=UrmsAforCalib/UrmsA_;
+				FatorCalibUb_=UrmsBforCalib/UrmsB_;
+				FatorCalibUc_=UrmsCforCalib/UrmsC_;
+				FatorCalibIa_=IrmsAforCalib/IrmsA_;
+				FatorCalibIb_=IrmsBforCalib/IrmsB_;
+				FatorCalibIc_=IrmsCforCalib/IrmsC_;
+				FatorCalibFreq=60.0/FreqA;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case DESABILITA_MEDICAO_FREQUENCIA:
+			{
+			    #ifdef LEGADO
+				T0TCR = 1;
+				T0CTCR=0;
+				T0CR0=0x0;
+				T0CCR=0x0;
+				#endif
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case DESABILITA_CAPATOR:
+			{
+				HabCapator=OFF;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case HABILITA_CAPATOR:
+			{
+				HabCapator=ON;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case APAGA_SETOR_CALIBRACAO:
+			{
+#ifndef REVISAO_D
+				ConfigurePLL_18Mhz();
+#endif
+				erase((void*)SETOR_CALIBRACAO_INICIO,(void*)SETOR_CALIBRACAO_FIM);	  //apaga um setor de 4Kbytes
+#ifndef REVISAO_D
+				ConfigurePLL_72Mhz();
+#endif
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case APAGA_SETOR_FLASH_PARAMETRIZACAO:
+			{
+#ifndef REVISAO_D
+				ConfigurePLL_18Mhz();
+#endif
+				erase((void*)SETOR_PARAMETRIZACAO_INICIO,(void*)SETOR_PARAMETRIZACAO_FIM);	  //apaga um setor de 4Kbytes
+#ifndef REVISAO_D
+				ConfigurePLL_72Mhz();
+#endif
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case ZERA_DHT_TENSOES:
+			{
+				break;
+			}
+
+		case ZERA_DHT_TENSOES_INIT:
+			{
+				FatorCalibUa_=1.00;
+				FatorCalibUb_=1.00;
+				FatorCalibUc_=1.00;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case ZERA_DHT_IA:
+			{
+				FatorCalibIa_=IrmsA*1.00008/IrmsA_;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case ZERA_DHT_IA_INIT:
+			{
+				FatorCalibIa_=IrmsA*1.00008/IrmsA_;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+
+		case ZERA_DHT_IB:
+			{
+				FatorCalibIa_=IrmsA*1.00008/IrmsA_;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case ZERA_DHT_IB_INIT:
+			{
+				FatorCalibIb_=1.00;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case ZERA_DHT_IC:
+			{
+				FatorCalibIc_=IrmsC*1.00008/IrmsC_;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+		case ZERA_DHT_IC_INIT:
+			{
+				FatorCalibIc_=1.00;
+				FuncaoRemota1=DEFAULT;
+				break;
+			}
+	}
+}
+
+//altera os bytes para poder enviar pela comunica��o
+U64 swapU64 (U64 var)
+{
+	U64 ret;
+	ret = (var & 0xFFFF);
+
+	ret = ret << 16;
+	var = var >> 16;
+	ret = ret | (var & 0xFFFF);
+
+	ret = ret << 16;
+	var = var >> 16;
+	ret = ret | (var & 0xFFFF);
+
+	ret = ret << 16;
+	var = var >> 16;
+	ret = ret | (var & 0xFFFF);
+
+	return ret;
+}
+
+float swapFloat ( float var)
+{
+	union short2 {
+
+		short numShort[2];
+		float numFloat;
+	};
+
+	short temp;
+
+	union short2 ret;
+	ret.numFloat = var;
+	temp = ret.numShort[0];
+	ret.numShort[0] = ret.numShort[1];
+	ret.numShort[1] = temp;
+	return ret.numFloat;
+}
+
+int swapInt ( int var)
+{
+	union short2 {
+
+		short numShort[2];
+		int numInt;
+	};
+
+	short temp;
+
+	union short2 ret;
+	ret.numInt = var;
+	temp = ret.numShort[0];
+	ret.numShort[0] = ret.numShort[1];
+	ret.numShort[1] = temp;
+	return ret.numInt;
+}
+
+#define NO_DATA_AVAILABLE			0
+#define SEND_CORRECT_VALUE			1
+#define SEND_NEAREST_HIGH_VALUE		2
+#define SEND_NEWEST_VALUE			3
+#define SEND_OLDEST_VALUE			4
+#define DATA_NOT_FOUND				5
+
+RegistroMD4040TI_ OldestData;
+RegistroMD4040TI_ NewestData;
+RegistroMD4040TI_ NearestData;
+RegistroMD4040TI_ NearestLowerData;
+RegistroMD4040TI_ NearestHigherData;
+RegistroMD4040TI_ DataToRead;
+RegistroMD4040TI_ Registro;
+U64 RequestedTimeStamp;
+
+char register_found = 0;
+
+/*
+	R n�o existe e � maior que todos na mm
+	R n�o existe e � menor que todos na mm
+	R existe na mm
+	R n�o existe na mm, mas n�o � o maior nem o menor valor
+*/
+int isDataAvailable()
+{
+
+	int m = 0;
+	int cont = 0;
+	int is_timestamp_found = 0;
+	unsigned short id;
+
+
+	U64 distancia1 = 0xFFFFFFFFFFFFFFFF;
+	U64 distancia;
+
+	m = 0;
+
+	while (m < 2048)
+	{
+		id = BufferMovimentacao[m + 1];   //mais significativo
+		id = id << 8;
+		id = id | BufferMovimentacao[m];  //menos significativo
+		cont = cont + 1;
+
+		if (cont >= 2048)
+			break;
+
+		if ((id==(unsigned short)REG_BATT_MEM_ALERTA_BAT_MORTA)||
+		    (id==(unsigned short)REG_BATT_MEM_ALT_CONFIG		)||
+			(id==(unsigned short)REG_BATT_MEM_VPULSO			)||
+			(id==(unsigned short)REG_BATT_MEM_QPULSO			))
+		{
+			m = m + sizeof(RegistroDeAlteracoesConfig_);
+		}
+
+		if (id == (unsigned short)REG_BATT_MEM_NORM_COM_RTC)
+		{
+			m = m + sizeof(RegistroNormalComRelogio_);
+		}
+		if (id == (unsigned short)REG_BATT_MEM_NORM_SEM_RTC)
+		{
+			m = m + sizeof(RegistroNormalSemRelogio_);
+		}
+		if (id == (unsigned short)REG_BATT_MEM_ALT_FLASH_ESCRITA)
+		{
+			m = m + sizeof(RegistroDeAlteracoesFlash_);
+		}
+		if 	(id == (unsigned short)REG_BATT_MEM_ATV_FLASH_LEITURA)
+		{
+			m = m + sizeof(RegistroDeLeituraFlash_);
+		}
+		if 	(id == (unsigned short)REG_BATT_MEM_ALT_RELES)
+		{
+			m = m + sizeof(RegistroDeAlteracoesReles_);
+		}
+		if 	(id == (unsigned short) REG_BATT_MEM_Q)
+		{
+			m = m + sizeof(RegistroDeQuedas_e_Voltas_);
+		}
+		if (id == (unsigned short) REG_BATT_MEM_V)
+		{
+			m = m + sizeof(RegistroDeQuedas_e_Voltas_);
+		}
+		if ((id == (unsigned short)DEFAULT1) || (id == (unsigned short) ~DEFAULT1))
+		{
+			m = m + sizeof(BaseBattRam);
+			m = m - sizeof(DWORD); //ajuste do alinhamento...
+		}
+
+	    if 	((id == (unsigned short)REG_BATT_MEM_NORM_COM_RTC_ANTES_DE_QUEDA ) ||
+	    	(id == (unsigned short) REG_BATT_MEM_NORM_MD4040TI_3G))
+	    {
+			register_found = 1;
+
+	    	memcpy(&Registro, &BufferMovimentacao[m], sizeof(RegistroMD4040TI_));
+
+	    	// Salva a data imediatamente abaixo da data requisitada
+	    	if(RequestedTimeStamp > Registro.Timestamp)
+	    	{
+	    		if(Registro.Timestamp > (NearestLowerData).Timestamp)
+	    			(NearestLowerData) = Registro;
+	    	}
+
+	    	// Salva a data imediatamente acima da data requisitada
+	    	if(RequestedTimeStamp < Registro.Timestamp)
+	    	{
+	    		if(Registro.Timestamp < (NearestHigherData).Timestamp)
+	    			(NearestHigherData) = Registro;
+	    	}
+
+	    	// Salva a data mais antiga da mem�ria
+	    	if (Registro.Timestamp < (OldestData).Timestamp)
+	    	{
+	    		(OldestData) = Registro;
+	    	}
+
+	    	// Salva a data mais recente da mem�ria
+	    	if (Registro.Timestamp > (NewestData).Timestamp)
+	    	{
+	    		(NewestData) = Registro;
+	    	}
+
+	    	// Salva a data exata requisitada
+	    	if (RequestedTimeStamp == Registro.Timestamp)
+	    	{
+
+	    		(DataToRead) = Registro;
+	    		return SEND_CORRECT_VALUE;
+	    	}
+
+			// Posicionamento do pr�ximo endere�o a ser analisado
+			m = m + sizeof( RegistroMD4040TI_);
+		}
+
+		if ((id == (unsigned short)0x0000) || (id == (unsigned short)0xFFFF))
+		{
+			break;
+		}
+	}
+
+	if(register_found == 1)
+	{
+		return DATA_NOT_FOUND;
+	}
+	else
+	{
+		return NO_DATA_AVAILABLE;
+	}
+}
+
+int GetDataFromMassMemory()
+{
+	long int k;
+	BYTE const *pFlashByte;
+	BYTE *pBattRamByte;
+	int is_data_in_battram = 0;
+	int is_data_in_mass_memory = 0;
+
+	(OldestData).Timestamp = 0xFFFFFFFFFFFFFFFF;
+	(NearestData).Timestamp = 0xFFFFFFFFFFFFFFFF;
+	(NearestHigherData).Timestamp = 0xFFFFFFFFFFFFFFFF;
+	(NearestLowerData).Timestamp = 0;
+	(NewestData).Timestamp = 0;
+
+	register_found = 0;
+
+	/* Busca na Batram */
+	pBattRamByte = (BYTE*)RTC_RAM_BASE_ADDR;
+	MoveRamToBuffer(pBattRamByte, &BufferMovimentacao[0], 2048);
+
+	is_data_in_battram = isDataAvailable();
+
+	if(is_data_in_battram == SEND_CORRECT_VALUE)
+		return SEND_CORRECT_VALUE;
+
+	/* Busca na Flash */
+	pFlashByte = (const BYTE*)SETOR_MM_INICIO;
+	k = SETOR_MM_INICIO;
+
+	while (k <= SETOR_MM_FIM)
+	{
+		//movimentamos bloco de 2k da Flash para an�lise local em RAM
+		MoveFlashToBuffer(pFlashByte, &BufferMovimentacao[0], 2048);
+		pFlashByte += 2048;
+		k = k + 2048;
+		is_data_in_mass_memory = isDataAvailable();
+
+		if(is_data_in_mass_memory == SEND_CORRECT_VALUE)
+			return SEND_CORRECT_VALUE;
+	}
+
+	if(is_data_in_battram == DATA_NOT_FOUND || is_data_in_mass_memory == DATA_NOT_FOUND)
+	{
+		if(RequestedTimeStamp > (OldestData).Timestamp && RequestedTimeStamp < (NewestData).Timestamp)
+		{
+			return SEND_NEAREST_HIGH_VALUE;
+		}
+		else if(RequestedTimeStamp > (NewestData).Timestamp)
+		{
+			return SEND_NEWEST_VALUE;
+		}
+		else
+		{
+			return SEND_OLDEST_VALUE;
+		}
+	}
+	else if(is_data_in_battram == NO_DATA_AVAILABLE && is_data_in_mass_memory == NO_DATA_AVAILABLE)
+	{
+		return NO_DATA_AVAILABLE;
+	}
+}
+
+void SendToService()
+{
+	TimeStampReaded = swapU64(DataToRead.Timestamp);
+
+/*
+	U64 ret,var=DataToRead.Timestamp;
+	ret = (var & 0xFFFF);
+
+	ret = ret << 16;
+	var = var >> 16;
+	ret = ret | (var & 0xFFFF);
+
+	TimeStampReaded =ret;
+*/
+
+
+
+
+	UaReaded 	  	= swapFloat(DataToRead.MMUa_);
+	UbReaded		= swapFloat(DataToRead.MMUb_);
+	UcReaded		= swapFloat(DataToRead.MMUc_);
+	IaReaded		= swapFloat(DataToRead.MMIa_);
+	IbReaded 	 	= swapFloat(DataToRead.MMIb_);
+	IcReaded 		= swapFloat(DataToRead.MMIc_);
+	PReaded 		= swapFloat(DataToRead.MMDemP_);
+	QReaded   	 	= swapFloat(DataToRead.MMDemQ_);
+	TempReaded 		= swapFloat(DataToRead.MMTemp_);
+	TempReaded2		= swapFloat(DataToRead.MMTemp2_);
+
+
+
+//	#if EQUIP == CM_EQUIP
+//	pulso1readed	= DataToRead.MMPulso1;
+//	pulso2readed	= DataToRead.MMPulso2;
+//	#else
+	pulso1readed	= swapFloat(DataToRead.MMPulso1);
+	pulso2readed	= swapFloat(DataToRead.MMPulso2);
+//	#endif
+	StatusDosRelesReaded = swapInt(DataToRead.MMStatusDosReles);
+}
+
+void InitVariables()
+{
+	TimeStampReaded = 0xFFFFFFFFFFFFFFFF ;
+	UaReaded 	  	= 0;
+	UbReaded		= 0;
+	UcReaded		= 0;
+	IaReaded		= 0;
+	IbReaded 	 	= 0;
+	IcReaded 		= 0;
+	PReaded 		= 0;
+	QReaded   	 	= 0;
+	TempReaded 		= 0;
+}
+
+void SearchTimeStampInMassMemory(void)
+{
+	int select_data_to_send = 0;
+
+	InitVariables();
+
+	RequestedTimeStamp = swapU64(TimeStampToRead);
+
+	if ((TimeStampToRead == 0xFFFFFFFFFFFFFFFF) || (TimeStampToRead == 0))
+	{
+		SendToService();
+		return;
+	}
+
+	select_data_to_send = GetDataFromMassMemory();
+
+	switch(select_data_to_send)
+	{
+		case NO_DATA_AVAILABLE:
+			InitVariables();
+			DataToRead.Timestamp = 0xFFFFFFFFFFFFFFFF;
+		break;
+
+		case SEND_CORRECT_VALUE:
+			DataToRead = DataToRead;
+		break;
+
+		case SEND_NEAREST_HIGH_VALUE:
+			DataToRead = NearestHigherData;
+		break;
+
+		case SEND_NEWEST_VALUE:
+			//DataToRead = NewestData;
+			InitVariables();
+			DataToRead.Timestamp = 0xFFFFFFFFFFFFFFFF;
+		break;
+
+		case SEND_OLDEST_VALUE:
+			DataToRead = OldestData;
+		break;
+	}
+
+	SendToService();
+}
+

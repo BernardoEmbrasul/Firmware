@@ -1,0 +1,5 @@
+../Core/Port/wdt.c:27:6:WDTHandler	4	static
+../Core/Port/wdt.c:50:7:WDTInit	4	static
+../Core/Port/wdt.c:90:6:WDTFeed	8	static
+../Core/Port/wdt.c:105:6:toogleWDI	8	static
+../Core/Port/wdt.c:119:6:forceReset	8	static

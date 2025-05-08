@@ -1,0 +1,17 @@
+flash.c:124:6:MoveRamToBuffer	0	static
+flash.c:142:6:MoveBytesBufferToBuffer	0	static
+flash.c:158:6:MoveBufferToRam	0	static
+flash.c:175:6:MoveFlashToBuffer	0	static
+flash.c:191:6:IniciaParametrosCalibracaoDefault	16	static
+flash.c:508:6:AtualizaPolinomios	20	static
+flash.c:307:6:RestauraCalibracao	8	static
+flash.c:489:6:load_MAC	8	static
+flash.c:821:6:RestauraParametrizacaoDefault	40	static
+flash.c:1173:6:CalcLRCofDataHeader	0	static
+flash.c:1640:15:TestaMomento1	32	static
+flash.c:1599:15:TestaMomento	48	static
+flash.c:1194:6:PowerUp	128	static
+flash.c:1698:6:PowerDown	80	static
+flash.c:1876:6:AtualizaParametrizacao	0	static
+flash.c:676:6:RestauraParametrizacao	40	static
+flash.c:1085:6:SalvaParametrizacao	8	static

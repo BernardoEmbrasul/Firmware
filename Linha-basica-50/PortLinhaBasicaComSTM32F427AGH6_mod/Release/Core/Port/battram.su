@@ -1,0 +1,7 @@
+battram.c:45:6:ClearBatteryRam	0	static
+battram.c:147:6:EraseMMSector	8	static
+battram.c:556:6:AtualizaLRCBloco2K	8	static
+battram.c:5:6:InitBatteryRam	16	static
+battram.c:160:6:GravaNaBatteryRAM1	40	static
+battram.c:54:6:MoveBatteryRamToFlash	8	static
+battram.c:189:6:GravaNaBatteryRAM	48	static

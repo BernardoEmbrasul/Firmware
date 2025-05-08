@@ -1,0 +1,4 @@
+../Core/Port/adc.c:123:7:ADCInit	1
+../Core/Port/adc.c:207:6:ADCStartV	1
+../Core/Port/adc.c:216:7:ADCReadV	1
+../Core/Port/adc.c:244:7:ADC0Read	1

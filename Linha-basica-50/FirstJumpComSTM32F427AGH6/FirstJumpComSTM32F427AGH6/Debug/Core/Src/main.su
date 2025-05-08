@@ -1,0 +1,5 @@
+../Core/Src/main.c:65:6:deinitEverything	8	static
+../Core/Src/main.c:76:6:jumpToApp	24	static,ignoring_inline_asm
+../Core/Src/main.c:94:5:main	8	static
+../Core/Src/main.c:137:6:SystemClock_Config	88	static
+../Core/Src/main.c:180:6:Error_Handler	4	static,ignoring_inline_asm

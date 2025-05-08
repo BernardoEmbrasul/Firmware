@@ -1,0 +1,4 @@
+../Core/Port/adc.c:123:7:ADCInit	16	static
+../Core/Port/adc.c:207:6:ADCStartV	16	static
+../Core/Port/adc.c:216:7:ADCReadV	4	static
+../Core/Port/adc.c:244:7:ADC0Read	16	static

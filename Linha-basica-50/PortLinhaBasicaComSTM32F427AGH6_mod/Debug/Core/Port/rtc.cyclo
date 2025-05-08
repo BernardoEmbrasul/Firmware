@@ -1,0 +1,15 @@
+../Core/Port/rtc.c:26:6:RTCInit	1
+../Core/Port/rtc.c:52:6:RTCStart	1
+../Core/Port/rtc.c:71:6:RTCStop	1
+../Core/Port/rtc.c:89:6:RTC_CTCReset	1
+../Core/Port/rtc.c:107:6:RTCSetTime	1
+../Core/Port/rtc.c:147:6:RTCSetTimeFromEpoch	15
+../Core/Port/rtc.c:194:9:RTCGetTime	1
+../Core/Port/rtc.c:253:6:TesteBateria	2
+../Core/Port/rtc.c:289:20:DateToTimestamp	2
+../Core/Port/rtc.c:329:6:GETtipoDeHorario	25
+../Core/Port/rtc.c:506:6:Releportempo2	16
+../Core/Port/rtc.c:620:6:Releportempo	164
+../Core/Port/rtc.c:1247:7:BuscaNovoMinimo	9
+../Core/Port/rtc.c:1291:7:RTCtoDataHora	1
+../Core/Port/rtc.c:1296:6:RTCtoMesDiaHoraMin	1

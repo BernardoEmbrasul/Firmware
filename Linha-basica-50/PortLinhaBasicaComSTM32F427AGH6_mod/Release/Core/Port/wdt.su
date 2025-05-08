@@ -1,0 +1,5 @@
+wdt.c:27:6:WDTHandler	0	static
+wdt.c:50:7:WDTInit	0	static
+wdt.c:90:6:WDTFeed	0	static
+wdt.c:105:6:toogleWDI	8	static
+wdt.c:119:6:forceReset	8	static

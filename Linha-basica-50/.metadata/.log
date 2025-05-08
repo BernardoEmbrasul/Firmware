@@ -1,0 +1,30 @@
+!SESSION 2025-05-08 08:41:16.664 -----------------------------------------------
+eclipse.buildId=Version 1.18.1
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=pt_BR
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-05-08 08:41:33.191
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-05-08 08:41:33.191
+!MESSAGE Log4j2 initialized with config file C:\Users\Bernardo\Desktop\teste do zero\Linha-basica-50\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-05-08 08:41:36.051
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-05-08 08:42:19.669
+!MESSAGE Indexed 'BootloaderComSTM32F427AGH6' (105 sources, 274 headers) in 5.69 sec: 11,892 declarations; 61,948 references; 3 unresolved inclusions; 43 syntax errors; 164 unresolved names (0.22%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-05-08 08:42:19.887
+!MESSAGE Indexed 'blink_rtc' (6 sources, 56 headers) in 0.215 sec: 2,044 declarations; 3,102 references; 10 unresolved inclusions; 1 syntax errors; 165 unresolved names (3.1%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-05-08 08:42:25.060
+!MESSAGE Indexed 'PortLinhaBasicaComSTM32F427AGH6_mod' (145 sources, 323 headers) in 5.11 sec: 22,243 declarations; 148,072 references; 3 unresolved inclusions; 81 syntax errors; 205 unresolved names (0.12%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-05-08 09:04:18.456
+!MESSAGE Indexed 'PortLinhaBasicaComSTM32F427AGH6_mod' (145 sources, 323 headers) in 4.88 sec: 22,243 declarations; 148,072 references; 3 unresolved inclusions; 81 syntax errors; 205 unresolved names (0.12%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2025-05-08 09:06:00.214
+!MESSAGE Indexed 'BootloaderComSTM32F427AGH6' (105 sources, 274 headers) in 3.25 sec: 11,892 declarations; 61,948 references; 3 unresolved inclusions; 43 syntax errors; 164 unresolved names (0.22%)

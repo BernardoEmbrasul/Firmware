@@ -1,0 +1,10 @@
+principal.c:660:13:modbus_message_received	16	static
+principal.c:121:6:refresh_ip	0	static
+principal.c:166:6:VerificaNumeroDeSerie	24	static
+principal.c:208:6:WriteAddrToAD	0	static
+principal.c:229:7:ReadValueFromAD	0	static
+principal.c:300:6:GetTemperatureFromAD	40	static
+principal.c:400:5:main1	48	static
+principal.c:742:5:udp_callback	8	static
+principal.c:757:5:tcp_callback	8	static
+principal.c:821:6:send_data	24	static

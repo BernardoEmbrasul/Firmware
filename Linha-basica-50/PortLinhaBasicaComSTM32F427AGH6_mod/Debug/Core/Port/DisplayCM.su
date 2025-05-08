@@ -1,0 +1,12 @@
+../Core/Port/DisplayCM.c:49:6:Atraso	24	static
+../Core/Port/DisplayCM.c:56:6:WrLcdChar	24	static
+../Core/Port/DisplayCM.c:90:6:WrLcdData	24	static
+../Core/Port/DisplayCM.c:127:6:WrLcdCom	16	static
+../Core/Port/DisplayCM.c:161:6:PulseE	4	static
+../Core/Port/DisplayCM.c:191:6:PrtLcd	24	static
+../Core/Port/DisplayCM.c:231:6:PrtLcd2	32	static
+../Core/Port/DisplayCM.c:300:6:InitLcd	8	static
+../Core/Port/DisplayCM.c:309:6:ResetLcd	8	static
+../Core/Port/DisplayCM.c:338:6:PrtLcdBcdNibble	24	static
+../Core/Port/DisplayCM.c:356:6:PosCur	16	static
+../Core/Port/DisplayCM.c:383:6:GeraSimbolos	4	static
